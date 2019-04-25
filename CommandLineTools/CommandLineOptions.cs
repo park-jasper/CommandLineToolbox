@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using CommandLine;
+using CommandLine.Text;
 
 namespace CommandLineTools
 {
@@ -76,6 +78,9 @@ namespace CommandLineTools
         [Option('g', "mainGroup", Required = false, HelpText = "Value to group the Main values by")]
         public string MainGroup { get; set; }
 
+        [Option("mainGroupSep", Required = false, HelpText = @"How to separate the main groups. Default is \hline")]
+        public string MainGroupSeparator { get; set; }
+
         [Option('s', "secondaries", Required = false, HelpText = "The secondary traits to distinguish by. Default is all available")]
         public IEnumerable<string> Secondaries { get; set; }
 
@@ -84,5 +89,47 @@ namespace CommandLineTools
 
         [Option("metric", Required = false, HelpText = "The metric to use on the data. Can be 'average', 'median', 'min', 'max'")]
         public string Metric { get; set; }
+
+        [Option("printAbsoluteValues", Required = false, HelpText = "Print the absolute values in the columns instead of the relative ones")]
+        public bool PrintAbsoluteValues { get; set; } = false;
+    }
+
+    [Verb("statisticalFunctions", HelpText = "calculates various different statistical functions on a set of data")]
+    public class StatisticalFunctionsOptions
+    {
+        [Option('d', "database", Required = true, HelpText = "Path to the database file")]
+        public string DatabaseFile { get; set; }
+
+        [Option('t', "table", Required = true, HelpText = "Database table to query")]
+        public string DatabaseTable { get; set; }
+
+        [Option('o', "out", Required = true, HelpText = "Database table to write to")]
+        public string DatabaseTableOut { get; set; }
+
+        [Option('v', "value", Required = true, HelpText = "Name of the value column. Can be an expression")]
+        public string Value { get; set; }
+
+        [Option('g', "groups", Required = false, HelpText = "The columns to group the values by. Default is one single group with all items")]
+        public IEnumerable<string> Groups { get; set; }
+
+        [Option('f', "functions", Required = false, HelpText = "Functions to apply to the data. Available are 'average', 'median', 'variance'.")]
+        public IEnumerable<string> Functions { get; set; }
+
+        [Usage]
+        public static IEnumerable<Example> Examples => 
+            new List<Example>
+            {
+                new Example(
+                    "Calculate the average and median over the table 'stats' on database 'db.sqlite' grouping by 'sorter' where 'value / numberOfCycles' gives the value to get the median of, and write to table 'statsMedian'",
+                    new StatisticalFunctionsOptions
+                    {
+                        DatabaseFile = "db.sqlite",
+                        DatabaseTable = "stats",
+                        DatabaseTableOut = "statsMedian",
+                        Value = "value / numberOfCycles",
+                        Groups = new[] {"sorter"},
+                        Functions = new[] {"average", "median"}
+                    })
+            };
     }
 }

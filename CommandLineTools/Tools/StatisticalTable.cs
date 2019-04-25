@@ -4,6 +4,7 @@ using CommandLineTools.Contracts;
 using System.Linq;
 using System.Data.SQLite;
 using System.Text;
+using CommandLineTools.Helpers;
 using MoreLinq;
 
 namespace CommandLineTools.Tools
@@ -37,6 +38,7 @@ namespace CommandLineTools.Tools
                 .Select(group => new DataResult
                 {
                     Main = group.Key,
+                    MainGroup = group.First().MainGroup,
                     GeoM = Math.Pow(group.Aggregate(1.0d, (current, d) => current * d.RelativeValue),
                         1d / numberOfGroups),
                     Data = group.OrderBy(d => d.Secondaries[0]).ToList()
@@ -51,16 +53,25 @@ namespace CommandLineTools.Tools
             var sb = new StringBuilder();
             const string columnSep = "@{~~}";
             sb.AppendLine(@"\begin{tabular}{l | r " + columnSep + " r | " + string.Join(columnSep, Enumerable.Repeat("r", numberOfGroups + 1)) + "|}");
-            sb.AppendLine(@" & \multicolumn{2}{c}{Overall} & \multicolumn{" + numberOfGroups + "}{c}{" +
+            sb.AppendLine(@" & \multicolumn{2}{c|}{Overall} & \multicolumn{" + numberOfGroups + "}{c}{" +
                           ( options.SecondaryAliases.FirstOrDefault() ?? secs[0] ) + @"} \\");
             sb.AppendLine(" & Rank & GeoM & " + string.Join("&", grouping.Select(g => g.Key).OrderBy(x => x)) +
                           @"\\ \hline");
-            foreach (var res in result)
+            if (!string.IsNullOrEmpty(options.MainGroup))
             {
-                sb.AppendLine(
-                    $"{GetFonted(res.Main, options.MainFont)} & {res.Rank} & {FormatDouble(res.GeoM)} & {string.Join("&", res.Data.Select(BoldRank1))}" +
-                    @"\\");
+                var mainGrouped = result.GroupBy(res => res.MainGroup).ToArray();
+                for (int i = 0; i < mainGrouped.Length - 1; i += 1)
+                {
+                    AppendLines(sb, mainGrouped[i].OrderBy(dr => dr.Rank), options, false);
+                }
+
+                AppendLines(sb, mainGrouped[mainGrouped.Length - 1].OrderBy(dr => dr.Rank), options, true);
             }
+            else
+            {
+                AppendLines(sb, result, options, true);
+            }
+            
 
             sb.AppendLine(@"\end{tabular}");
 
@@ -69,29 +80,56 @@ namespace CommandLineTools.Tools
             return 0;
         }
 
-        public static List<Data> RetrieveData(StatisticalTableOptions options)
+        private static void AppendLines(StringBuilder sb, IEnumerable<DataResult> result, StatisticalTableOptions options, bool lastBlock)
+        {
+            var arr = result.ToArray();
+            DataResult res;
+            for (int i = 0; i < (lastBlock ? arr.Length : arr.Length - 1); i += 1)
+            {
+                res = arr[i];
+                sb.AppendLine(
+                    $"{GetFonted(res.Main, options.MainFont)} & {res.Rank} & {FormatDouble(res.GeoM)} & {string.Join("&", res.Data.Select(d => BoldRank1(d, options)))}" +
+                    @"\\");
+            }
+
+            if (!lastBlock)
+            {
+                res = arr[arr.Length - 1];
+                sb.AppendLine(
+                    $"{GetFonted(res.Main, options.MainFont)} & {res.Rank} & {FormatDouble(res.GeoM)} & {string.Join("&", res.Data.Select(d => BoldRank1(d, options)))}" +
+                    (options.MainGroupSeparator ?? @"\\"));
+            }
+        }
+
+        private static List<Data> RetrieveData(StatisticalTableOptions options)
         {
             var metric = GetMetric(options.Metric);
             List<Data> data = new List<Data>();
-            using (var connection = new SQLiteConnection($"Data Source={options.DatabaseFile}"))
+            using (var connection = SQLiteHelpers.CreateConnection(options.DatabaseFile))
             {
                 connection.Open();
                 var secondaries = string.Join(",", options.Secondaries);
                 using (var command = new SQLiteCommand(connection)
                 {
                     CommandText =
-                        $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, {secondaries} FROM {options.DatabaseTable} group by {options.Main}, {secondaries}"
+                        $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, {secondaries} {GetMainGroup(options)} FROM {options.DatabaseTable} group by {options.Main}, {secondaries}"
                 })
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        data.Add(new Data
+                        var d = new Data
                         {
-                            Main = GetAsString(reader["_main"]),
-                            Value = GetAsDouble(reader["_value"]),
-                            Secondaries = options.Secondaries.Select(name => GetAsInt(reader[name])).ToArray()
-                        });
+                            Main = TypeHelpers.GetAsString(reader["_main"]),
+                            Value = TypeHelpers.GetAsDouble(reader["_value"]),
+                            Secondaries = options.Secondaries.Select(name => TypeHelpers.GetAsInt(reader[name])).ToArray()
+                        };
+                        if (!string.IsNullOrEmpty(options.MainGroup))
+                        {
+                            d.MainGroup = TypeHelpers.GetAsString(reader[options.MainGroup]);
+                        }
+
+                        data.Add(d);
                     }
 
                     reader.Close();
@@ -120,6 +158,11 @@ namespace CommandLineTools.Tools
             }
         }
 
+        public static string GetMainGroup(StatisticalTableOptions options)
+        {
+            return string.IsNullOrEmpty(options.MainGroup) ? "" : $", {options.MainGroup}";
+        }
+
         public static string FormatDouble(double value)
         {
             var rounded = Math.Round(value, 2);
@@ -131,9 +174,9 @@ namespace CommandLineTools.Tools
             return string.IsNullOrEmpty(font) ? main : string.Format(font, main);
         }
 
-        public static string BoldRank1(Data data)
+        private static string BoldRank1(Data data, StatisticalTableOptions options)
         {
-            var result = FormatDouble(data.RelativeValue);
+            var result = FormatDouble(options.PrintAbsoluteValues ? data.Value : data.RelativeValue);
             if (data.IsRelativeOne)
             {
                 result = @"\textbf{" + result + @"}";
@@ -142,88 +185,25 @@ namespace CommandLineTools.Tools
             return result;
         }
 
-        public static int GetAsInt(object value)
+        private class Data
         {
-            switch (value)
-            {
-                case int ivalue:
-                    return ivalue;
-                case long lvalue:
-                    return (int) lvalue;
-                case float fvalue:
-                    return (int) fvalue;
-                case double dvalue:
-                    return (int) dvalue;
-                case decimal dvalue:
-                    return (int) dvalue;
-                case string svalue:
-                    if (int.TryParse(svalue, out int result))
-                    {
-                        return result;
-                    }
-                    throw new InvalidCastException(
-                        $"Could not cast object {value} with type {value.GetType()} to int.");
-                default:
-                    throw new InvalidCastException(
-                        $"Could not cast object {value} with type {value.GetType()} to int.");
-            }
+            public string Main { get; set; }
+            public string MainGroup { get; set; }
+            public double Value { get; set; }
+
+            public double RelativeValue { get; set; }
+            public bool IsRelativeOne { get; set; } = false;
+
+            public int[] Secondaries { get; set; }
         }
 
-        public static double GetAsDouble(object value)
+        private class DataResult
         {
-            switch (value)
-            {
-                case int ivalue:
-                    return (double) ivalue;
-                case long lvalue:
-                    return (double) lvalue;
-                case float fvalue:
-                    return (double) fvalue;
-                case double dvalue:
-                    return dvalue;
-                case decimal dvalue:
-                    return (double) dvalue;
-                case string svalue:
-                    if (double.TryParse(svalue, out var result))
-                    {
-                        return result;
-                    }
-                    throw new InvalidCastException(
-                        $"Could not cast object {value} with type {value.GetType()} to double.");
-                default:
-                    throw new InvalidCastException(
-                        $"Could not cast object {value} with type {value.GetType()} to double.");
-            }
+            public string Main { get; set; }
+            public string MainGroup { get; set; }
+            public double GeoM { get; set; }
+            public List<Data> Data { get; set; }
+            public int Rank { get; set; }
         }
-
-        public static string GetAsString(object value)
-        {
-            switch (value)
-            {
-                case string svalue:
-                    return svalue;
-                default:
-                    return value.ToString();
-            }
-        }
-    }
-
-    public class Data
-    {
-        public string Main { get; set; }
-        public double Value { get; set; }
-
-        public double RelativeValue { get; set; }
-        public bool IsRelativeOne { get; set; } = false;
-
-        public int[] Secondaries { get; set; }
-    }
-
-    public class DataResult
-    {
-        public string Main { get; set; }
-        public double GeoM { get; set; }
-        public List<Data> Data { get; set; }
-        public int Rank { get; set; }
     }
 }

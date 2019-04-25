@@ -17,12 +17,13 @@ namespace CommandLineTools
         {
             Parser
                 .Default
-                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions>(args)
+                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions, StatisticalFunctionsOptions>(args)
                 .MapResult(
                     (InFileReplaceOptions opt) => new InFileReplace(_fileService).ExecuteCommand(opt),
                     (RemoveLinesOptions opt) => new RemoveLines(_fileService).ExecuteCommand(opt),
                     (ExecuteBatchOptions opt) => new ExecuteBatch(_fileService).ExecuteCommand(opt),
                     (StatisticalTableOptions opt) => new StatisticalTable(_fileService).ExecuteCommand(opt),
+                    (StatisticalFunctionsOptions opt) => new StatisticalFunctions().ExecuteCommand(opt),
                     errs => 1);
         }
     }

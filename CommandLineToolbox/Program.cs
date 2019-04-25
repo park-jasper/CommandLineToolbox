@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,10 @@ namespace CommandLineToolbox
             new CommandLineTools
                 .CommandLineTools(new FileService())
                 .Run(args);
+            if (Debugger.IsAttached)
+            {
+                Console.ReadLine();
+            }
         }
     }
 }
