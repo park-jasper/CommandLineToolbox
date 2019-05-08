@@ -109,10 +109,16 @@ namespace CommandLineTools.Tools
             {
                 connection.Open();
                 var secondaries = string.Join(",", options.Secondaries);
+                string cText =
+                    $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, {secondaries}{GetMainGroup(options)} FROM {GetUnion(options.DatabaseTable)} group by {options.Main}, {secondaries}";
+
+                if (options.Verbose)
+                {
+                    Console.WriteLine("Command Text: " + cText);
+                }
                 using (var command = new SQLiteCommand(connection)
                 {
-                    CommandText =
-                        $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, {secondaries} {GetMainGroup(options)} FROM {options.DatabaseTable} group by {options.Main}, {secondaries}"
+                    CommandText =  cText
                 })
                 using (var reader = command.ExecuteReader())
                 {
@@ -122,7 +128,8 @@ namespace CommandLineTools.Tools
                         {
                             Main = TypeHelpers.GetAsString(reader["_main"]),
                             Value = TypeHelpers.GetAsDouble(reader["_value"]),
-                            Secondaries = options.Secondaries.Select(name => TypeHelpers.GetAsInt(reader[name])).ToArray()
+                            Secondaries = options.Secondaries.Select(name => TypeHelpers.GetAsInt(reader[name]))
+                                .ToArray()
                         };
                         if (!string.IsNullOrEmpty(options.MainGroup))
                         {
@@ -139,6 +146,28 @@ namespace CommandLineTools.Tools
             }
 
             return data;
+        }
+
+        public static string GetUnion(IEnumerable<string> tables)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("(");
+            bool first = true;
+            foreach (var t in tables)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    sb.AppendLine("UNION");
+                }
+
+                sb.AppendLine($"SELECT * FROM {t}");
+            }
+            sb.Append(")");
+            return sb.ToString();
         }
 
         public static string GetMetric(string metric)

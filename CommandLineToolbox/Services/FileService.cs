@@ -21,6 +21,11 @@ namespace CommandLineToolbox.Services
             return File.ReadLines(path);
         }
 
+        public void WriteAllLines(string path, IEnumerable<string> lines)
+        {
+            File.WriteAllLines(path, lines);
+        }
+
         public void WriteAllText(string path, string content)
         {
             File.WriteAllText(path, content);

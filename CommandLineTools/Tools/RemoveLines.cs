@@ -18,7 +18,7 @@ namespace CommandLineTools.Tools
 
         public int ExecuteCommand(RemoveLinesOptions options)
         {
-            var input = _fileService.ReadAllLines(options.InputFile);
+            var input = _fileService.ReadLinesLazily(options.InputFile);
             var patternsConcatenated = options.Patterns;
             patternsConcatenated = patternsConcatenated.Replace("\\#", " ");
             var patterns = patternsConcatenated.Split('#');
@@ -26,40 +26,44 @@ namespace CommandLineTools.Tools
             {
                 patterns[i] = patterns[i].Replace(" ", "#");
             }
+
+            var matches = MatchesPatterns(patterns, options.ConjunctivePatterns);
+            _fileService.WriteAllLines(options.OutputFile ?? options.InputFile,
+                input.Where(x => !matches(x)));
             
-            List<string>[] result;
-            List<string> compare = new List<string>();
-            if (input.Length < LineParallelThreshold)
-            {
-                result = new List<string>[1];
-                result[0] = MatchSequentially(input, 0, input.Length, MatchesPatterns(patterns, options.ConjunctivePatterns));
-            }
-            else
-            {
-                var availableCores = System.Environment.ProcessorCount;
-                var linesPerCore = input.Length / availableCores;
-                result = new List<string>[availableCores];
-                var tasks = new Task<List<string>>[availableCores - 1];
-                for (int i = 0; i < availableCores - 1; i += 1)
-                {
-                    var i1 = i;
-                    tasks[i] = Task.Run(() => MatchSequentially(input, i1 * linesPerCore,
-                        ( i1 + 1 ) * linesPerCore,
-                        MatchesPatterns(patterns, options.ConjunctivePatterns)));
-                }
+            //List<string>[] result;
+            //List<string> compare = new List<string>();
+            //if (input.Length < LineParallelThreshold)
+            //{
+            //    result = new List<string>[1];
+            //    result[0] = MatchSequentially(input, 0, input.Length, MatchesPatterns(patterns, options.ConjunctivePatterns));
+            //}
+            //else
+            //{
+            //    var availableCores = System.Environment.ProcessorCount;
+            //    var linesPerCore = input.Length / availableCores;
+            //    result = new List<string>[availableCores];
+            //    var tasks = new Task<List<string>>[availableCores - 1];
+            //    for (int i = 0; i < availableCores - 1; i += 1)
+            //    {
+            //        var i1 = i;
+            //        tasks[i] = Task.Run(() => MatchSequentially(input, i1 * linesPerCore,
+            //            ( i1 + 1 ) * linesPerCore,
+            //            MatchesPatterns(patterns, options.ConjunctivePatterns)));
+            //    }
 
-                result[availableCores - 1] = MatchSequentially(input, ( availableCores - 1 ) * linesPerCore,
-                    input.Length, MatchesPatterns(patterns, options.ConjunctivePatterns));
-                for (int i = 0; i < availableCores - 1; i += 1)
-                {
-                    result[i] = tasks[i].Result;
-                }
-            }
+            //    result[availableCores - 1] = MatchSequentially(input, ( availableCores - 1 ) * linesPerCore,
+            //        input.Length, MatchesPatterns(patterns, options.ConjunctivePatterns));
+            //    for (int i = 0; i < availableCores - 1; i += 1)
+            //    {
+            //        result[i] = tasks[i].Result;
+            //    }
+            //}
 
-            //var result = input.WhereNot(MatchesPatterns(patterns, options.ConjunctivePatterns)).ToArray();
-            var destination = options.OutputFile ?? options.InputFile;
-            var arrayResult = MakeArray(result);
-            _fileService.WriteAllLines(destination, arrayResult);
+            ////var result = input.WhereNot(MatchesPatterns(patterns, options.ConjunctivePatterns)).ToArray();
+            //var destination = options.OutputFile ?? options.InputFile;
+            //var arrayResult = MakeArray(result);
+            //_fileService.WriteAllLines(destination, arrayResult);
 
             return 0;
         }

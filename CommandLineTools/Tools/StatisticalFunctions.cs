@@ -12,6 +12,11 @@ namespace CommandLineTools.Tools
         public int ExecuteCommand(StatisticalFunctionsOptions options)
         {
             List<Data> data = RetrieveData(options);
+            if (data == null || data.Count == 0)
+            {
+                Console.WriteLine($"No data found in table {options.DatabaseTable}");
+                return 1;
+            }
 
             var funcs = options.Functions.ToArray();
 
@@ -163,22 +168,25 @@ namespace CommandLineTools.Tools
             {
                 connection.Open();
                 var groups = string.Join(",", options.Groups);
-                using (var command = new SQLiteCommand(connection)
+                foreach (var table in options.DatabaseTable)
                 {
-                    CommandText = $"SELECT {options.Value} as _value, {groups} FROM {options.DatabaseTable}"
-                })
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
+                    using (var command = new SQLiteCommand(connection)
                     {
-                        data.Add(new Data
+                        CommandText = $"SELECT {options.Value} as _value, {groups} FROM {table}"
+                    })
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
                         {
-                            Value = TypeHelpers.GetAsDouble(reader["_value"]),
-                            Groups = options.Groups.Select(g => TypeHelpers.GetAsString(reader[g])).ToArray()
-                        });
-                    }
+                            data.Add(new Data
+                            {
+                                Value = TypeHelpers.GetAsDouble(reader["_value"]),
+                                Groups = options.Groups.Select(g => TypeHelpers.GetAsString(reader[g])).ToArray()
+                            });
+                        }
 
-                    reader.Close();
+                        reader.Close();
+                    }
                 }
 
                 connection.Close();

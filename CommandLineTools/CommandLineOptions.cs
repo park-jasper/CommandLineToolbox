@@ -54,11 +54,14 @@ namespace CommandLineTools
     [Verb("statisticalTable", HelpText = "Create table over various dimensions")]
     public class StatisticalTableOptions
     {
+        [Option("--verbose", Required = false, HelpText = "Print additional info")]
+        public bool Verbose { get; set; } = false;
+
         [Option('d', "database", Required = true, HelpText = "Path to the database file")]
         public string DatabaseFile { get; set; }
 
         [Option('t', "table", Required = true, HelpText = "Database table to query")]
-        public string DatabaseTable { get; set; }
+        public IEnumerable<string> DatabaseTable { get; set; }
 
         [Option('o', "out", Required = true, HelpText = "Where to write the resulting table")]
         public string OutputFile { get; set; }
@@ -101,7 +104,7 @@ namespace CommandLineTools
         public string DatabaseFile { get; set; }
 
         [Option('t', "table", Required = true, HelpText = "Database table to query")]
-        public string DatabaseTable { get; set; }
+        public IEnumerable<string> DatabaseTable { get; set; }
 
         [Option('o', "out", Required = true, HelpText = "Database table to write to")]
         public string DatabaseTableOut { get; set; }
@@ -124,7 +127,7 @@ namespace CommandLineTools
                     new StatisticalFunctionsOptions
                     {
                         DatabaseFile = "db.sqlite",
-                        DatabaseTable = "stats",
+                        DatabaseTable = new[] {"stats"},
                         DatabaseTableOut = "statsMedian",
                         Value = "value / numberOfCycles",
                         Groups = new[] {"sorter"},
