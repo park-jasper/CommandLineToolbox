@@ -35,5 +35,17 @@ namespace CommandLineToolbox.Services
         {
             File.WriteAllLines(path, lines);
         }
+        public void DeleteFile(string path)
+        {
+            File.Delete(path);
+        }
+        public byte[] ReadAllBytes(string path)
+        {
+            return File.ReadAllBytes(path);
+        }
+        public void WriteAllBytes(string path, byte[] arr)
+        {
+            File.WriteAllBytes(path, arr);
+        }
     }
 }

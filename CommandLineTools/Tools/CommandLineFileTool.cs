@@ -1,4 +1,5 @@
 ﻿using CommandLineTools.Contracts;
+using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {

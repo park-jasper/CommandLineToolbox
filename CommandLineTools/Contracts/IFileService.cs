@@ -13,5 +13,8 @@ namespace CommandLineTools.Contracts
         void WriteAllText(string path, string content);
         void WriteAllLines(string path, string[] lines);
         void WriteAllLines(string path, IEnumerable<string> lines);
+        void DeleteFile(string path);
+        byte[] ReadAllBytes(string path);
+        void WriteAllBytes(string path, byte[] arr);
     }
 }

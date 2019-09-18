@@ -9,12 +9,24 @@ namespace CommandLineTools.Tools
 {
     public class StatisticalFunctions
     {
+        private VerboseLogger Log;
         public int ExecuteCommand(StatisticalFunctionsOptions options)
         {
-            List<Data> data = RetrieveData(options);
+            Log = new VerboseLogger(options);
+            List<Data> data;
+            try
+            {
+                data = RetrieveData(options);
+            }
+            catch (Exception exc)
+            {
+                Log.Error(exc, "Error while reading data from database");
+                return -1;
+            }
+
             if (data == null || data.Count == 0)
             {
-                Console.WriteLine($"No data found in table {options.DatabaseTable}");
+                Log.Error($"No data found in table {options.DatabaseTable}");
                 return 1;
             }
 
@@ -29,17 +41,21 @@ namespace CommandLineTools.Tools
                 switch (funcs[i])
                 {
                     case "average":
+                        Log.Info("Calculating average");
                         res[i] = Calculate(data, d => d.Average(x => x.Value));
                         break;
                     case "median":
+                        Log.Info("Calculating median");
                         res[i] = Calculate(data, CalculateMedian);
                         break;
                     case "variance":
+                        Log.Info("Calculating variance");
                         res[i] = Calculate(data, CalculateVariance);
                         break;
                 }
             }
 
+            Log.Info($"Opening {options.DatabaseFile}");
             using (var connection = SQLiteHelpers.CreateConnection(options.DatabaseFile))
             {
                 connection.Open();
@@ -48,6 +64,7 @@ namespace CommandLineTools.Tools
                     CommandText =
                         $"CREATE TABLE IF NOT EXISTS {options.DatabaseTableOut} ({GetColumns(options.Groups, "TEXT")}, {GetColumns(funcs, "REAL")});"
                 };
+                Log.Info($"Executing Command: {command.CommandText}");
                 command.ExecuteNonQuery();
 
                 List<string> valuesList = new List<string>();
@@ -60,9 +77,11 @@ namespace CommandLineTools.Tools
                 }
 
                 command.CommandText = $"INSERT INTO {options.DatabaseTableOut} VALUES {string.Join(",", valuesList)};";
+                Log.Info($"Inserting Values into: {options.DatabaseTableOut}");
                 command.ExecuteNonQuery();
 
                 command.Dispose();
+                Log.Info("Closing Database");
                 connection.Close();
             }
 
@@ -160,19 +179,21 @@ namespace CommandLineTools.Tools
             }
         }
 
-        private static List<Data> RetrieveData(StatisticalFunctionsOptions options)
+        private List<Data> RetrieveData(StatisticalFunctionsOptions options)
         {
-            var valueName = options.Value;
             List<Data> data = new List<Data>();
+            Log.Info($"Reading data from '{options.DatabaseFile}'");
             using (var connection = SQLiteHelpers.CreateConnection(options.DatabaseFile))
             {
                 connection.Open();
                 var groups = string.Join(",", options.Groups);
                 foreach (var table in options.DatabaseTable)
                 {
+                    var commandText = $"SELECT {options.Value} as _value, {groups} FROM {table}";
+                    Log.Info($"Executing command '{commandText}'");
                     using (var command = new SQLiteCommand(connection)
                     {
-                        CommandText = $"SELECT {options.Value} as _value, {groups} FROM {table}"
+                        CommandText = commandText
                     })
                     using (var reader = command.ExecuteReader())
                     {
@@ -189,6 +210,7 @@ namespace CommandLineTools.Tools
                     }
                 }
 
+                Log.Info("Closing Database");
                 connection.Close();
             }
 
