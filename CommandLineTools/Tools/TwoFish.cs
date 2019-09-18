@@ -58,11 +58,10 @@ namespace CommandLineTools.Tools
         {
             Console.WriteLine("Enter your password please:");
             string password = "";
-            ConsoleKeyInfo key;
 
             while (true)
             {
-                key = Console.ReadKey(true);
+                var key = Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Enter)
                 {
                     break;
