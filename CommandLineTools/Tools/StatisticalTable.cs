@@ -39,7 +39,7 @@ namespace CommandLineTools.Tools
                 {
                     Main = group.Key,
                     MainGroup = group.First().MainGroup,
-                    GeoM = Math.Pow(group.Aggregate(1.0d, (current, d) => current * d.RelativeValue),
+                    GeoM = Math.Pow(group.Where(g => !g.Secondaries.Any(s => options.ExcludeFromGeoM.Contains(s))).Aggregate(1.0d, (current, d) => current * d.RelativeValue),
                         1d / numberOfGroups),
                     Data = group.OrderBy(d => d.Secondaries[0]).ToList()
                 })
@@ -192,10 +192,24 @@ namespace CommandLineTools.Tools
             return string.IsNullOrEmpty(options.MainGroup) ? "" : $", {options.MainGroup}";
         }
 
-        public static string FormatDouble(double value)
+        public static string FormatDouble(double value, int decimals = -1)
         {
-            var rounded = Math.Round(value, 2);
-            return rounded.ToString("0.00").Replace(',', '.');
+            if (decimals == -1)
+            {
+                decimals = value < 10 ? 2 : ( value < 100 ? 1 : 0 );
+            }
+
+            string format = "0";
+            if (decimals == 1)
+            {
+                format = "0.0";
+            }
+            else if (decimals == 2)
+            {
+                format = "0.00";
+            }
+            var rounded = Math.Round(value, decimals);
+            return rounded.ToString(format).Replace(',', '.');
         }
 
         public static string GetFonted(string main, string font)
@@ -205,7 +219,7 @@ namespace CommandLineTools.Tools
 
         private static string BoldRank1(Data data, StatisticalTableOptions options)
         {
-            var result = FormatDouble(options.PrintAbsoluteValues ? data.Value : data.RelativeValue);
+            var result = FormatDouble(options.PrintAbsoluteValues ? data.Value : data.RelativeValue, data.Main == "2" ? 2 : -1);
             if (data.IsRelativeOne)
             {
                 result = @"\textbf{" + result + @"}";

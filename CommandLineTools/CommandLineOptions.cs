@@ -61,9 +61,6 @@ namespace CommandLineTools
     [Verb("statisticalTable", HelpText = "Create table over various dimensions")]
     public class StatisticalTableOptions : BaseOptions
     {
-        [Option("--verbose", Required = false, HelpText = "Print additional info")]
-        public bool Verbose { get; set; } = false;
-
         [Option('d', "database", Required = true, HelpText = "Path to the database file")]
         public string DatabaseFile { get; set; }
 
@@ -102,6 +99,9 @@ namespace CommandLineTools
 
         [Option("printAbsoluteValues", Required = false, HelpText = "Print the absolute values in the columns instead of the relative ones")]
         public bool PrintAbsoluteValues { get; set; } = false;
+
+        [Option("excludeFromGeom", Required = false, HelpText = "Array sizes to exclude from the GeoM because of negative average values")]
+        public IEnumerable<int> ExcludeFromGeoM { get; set; }
     }
 
     [Verb("statisticalFunctions", HelpText = "calculates various different statistical functions on a set of data")]
@@ -158,8 +158,8 @@ namespace CommandLineTools
         public string DatabaseTable { get; set; }
     }
 
-    [Verb("twoFish", HelpText = "encrypt or decrypt files with the twoFish algorithm")]
-    public class TwoFishOptions : BaseOptions
+    [Verb("crypto", HelpText = "encrypt or decrypt files with the twoFish algorithm")]
+    public class CryptoOptions : BaseOptions
     {
         [Option('i', "in", Required = true, HelpText = "File to encrypt or decrypt")]
         public string InputFile { get; set; }

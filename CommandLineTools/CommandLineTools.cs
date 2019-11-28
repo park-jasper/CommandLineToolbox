@@ -17,7 +17,7 @@ namespace CommandLineTools
         {
             Parser
                 .Default
-                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions, StatisticalFunctionsOptions, SqlPlotToolsHackOptions, TwoFishOptions>(args)
+                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions, StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions>(args)
                 .MapResult(
                     (InFileReplaceOptions opt) => new InFileReplace(_fileService).ExecuteCommand(opt),
                     (RemoveLinesOptions opt) => new RemoveLines(_fileService).ExecuteCommand(opt),
@@ -25,7 +25,7 @@ namespace CommandLineTools
                     (StatisticalTableOptions opt) => new StatisticalTable(_fileService).ExecuteCommand(opt),
                     (StatisticalFunctionsOptions opt) => new StatisticalFunctions().ExecuteCommand(opt),
                     (SqlPlotToolsHackOptions opt) => new SqlPlotToolsHack(_fileService).ExecuteCommand(opt),
-                    (TwoFishOptions opt) => new TwoFish(_fileService).ExecuteCommand(opt),
+                    (CryptoOptions opt) => new CryptoTool(_fileService).ExecuteCommand(opt),
                     errs => 1);
         }
     }

@@ -5,14 +5,14 @@ using System.Text;
 
 namespace CommandLineTools.Domain
 {
-    public class TwoFishCryptor
+    public class AESCryptor
     {
         private readonly SymmetricAlgorithm _internalCryptor;
         private readonly HashAlgorithm _hashAlgorithm;
         private readonly RNGCryptoServiceProvider _randomSource;
         public const int BitsPerByte = 8;
         public const int BlockSize = 128 / BitsPerByte;
-        public TwoFishCryptor()
+        public AESCryptor()
         {
             _internalCryptor = Aes.Create();
             _hashAlgorithm = SHA256.Create();

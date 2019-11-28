@@ -6,46 +6,24 @@ namespace CommandLineToolbox.Services
 {
     public class FileService : IFileService
     {
-        public string ReadAllText(string path)
-        {
-            return File.ReadAllText(path);
-        }
+        public string ReadAllText(string path) => File.ReadAllText(path);
 
-        public string[] ReadAllLines(string path)
-        {
-            return File.ReadAllLines(path);
-        }
+        public string[] ReadAllLines(string path) => File.ReadAllLines(path);
 
-        public IEnumerable<string> ReadLinesLazily(string path)
-        {
-            return File.ReadLines(path);
-        }
+        public IEnumerable<string> ReadLinesLazily(string path) => File.ReadLines(path);
 
-        public void WriteAllLines(string path, IEnumerable<string> lines)
-        {
-            File.WriteAllLines(path, lines);
-        }
+        public bool Exists(string path) => File.Exists(path);
 
-        public void WriteAllText(string path, string content)
-        {
-            File.WriteAllText(path, content);
-        }
+        public void WriteAllLines(string path, IEnumerable<string> lines) => File.WriteAllLines(path, lines);
 
-        public void WriteAllLines(string path, string[] lines)
-        {
-            File.WriteAllLines(path, lines);
-        }
-        public void DeleteFile(string path)
-        {
-            File.Delete(path);
-        }
-        public byte[] ReadAllBytes(string path)
-        {
-            return File.ReadAllBytes(path);
-        }
-        public void WriteAllBytes(string path, byte[] arr)
-        {
-            File.WriteAllBytes(path, arr);
-        }
+        public void WriteAllText(string path, string content) => File.WriteAllText(path, content);
+
+        public void WriteAllLines(string path, string[] lines) => File.WriteAllLines(path, lines);
+
+        public void DeleteFile(string path) => File.Delete(path);
+
+        public byte[] ReadAllBytes(string path) => File.ReadAllBytes(path);
+
+        public void WriteAllBytes(string path, byte[] arr) => File.WriteAllBytes(path, arr);
     }
 }

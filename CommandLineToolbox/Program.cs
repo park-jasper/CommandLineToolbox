@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommandLineToolbox.Services;
 using Microsoft.VisualBasic.FileIO;
+using Newtonsoft.Json;
 
 namespace CommandLineToolbox
 {
