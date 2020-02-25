@@ -24,7 +24,8 @@ namespace CommandLineToolbox
                 .Run(args);
             if (Debugger.IsAttached)
             {
-                Console.ReadLine();
+                Console.WriteLine("Exit delayed because of attached debugger. Press any key to exit");
+                Console.ReadKey();
             }
         }
 

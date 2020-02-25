@@ -102,6 +102,12 @@ namespace CommandLineTools
 
         [Option("excludeFromGeom", Required = false, HelpText = "Array sizes to exclude from the GeoM because of negative average values")]
         public IEnumerable<int> ExcludeFromGeoM { get; set; }
+
+        [Option("excludeFromGeomName", Required = false)]
+        public int ExcludeFromGeomMachine { get; set; } = 0;
+
+        [Option("onlyGeoms", Required = false)]
+        public bool OnlyGeoms { get; set; }
     }
 
     [Verb("statisticalFunctions", HelpText = "calculates various different statistical functions on a set of data")]
@@ -173,5 +179,44 @@ namespace CommandLineTools
         public bool Temporarily { get; set; }
         [Option("keep", Required = false, HelpText = "Do not keep original file for non-temporary encryption/decryption")]
         public bool Keep { get; set; }
+    }
+
+    [Verb("tryCopy", HelpText = "Copy if possible")]
+    public class TryCopyOptions : BaseOptions
+    {
+        [Option("neverFail", Required = false)]
+        public bool NeverFail { get; set; }
+        [Option("source", Required = true)]
+        public string SourcePath { get; set; }
+        [Option("destination", Required = true)]
+        public string DestinationPath { get; set; }
+
+        [Option('d', "directory", Required = false)]
+        public bool IsDirectory { get; set; }
+        [Option('n', "network", Required = false)]
+        public bool IsNetwork { get; set; }
+    }
+
+    [Verb("test", HelpText = "for testing or short-term applications")]
+    public class TestOptions : BaseOptions
+    {
+        [Option('t', "tableName", Required = true)]
+        public string TablePrefix { get; set; }
+        [Option("postFixes", Required = true)]
+        public IEnumerable<string> TablePostfixes { get; set; }
+        [Option("snfilter", Required = true)]
+        public string SnFilter { get; set; }
+        [Option("isfilter", Required = true)]
+        public string IsFilter { get; set; }
+        [Option("machineNames", Required = false)]
+        public IEnumerable<string> MachineNames { get; set; }
+        [Option("database", Required = true)]
+        public string DatabaseFile { get; set; }
+        [Option("arraySizeExclude")]
+        public int ArraySizeExclude { get; set; }
+        [Option("machineNameExclude")]
+        public string MachineExclude { get; set; }
+        [Option('o', "out")]
+        public string OutputFilePath { get; set; }
     }
 }

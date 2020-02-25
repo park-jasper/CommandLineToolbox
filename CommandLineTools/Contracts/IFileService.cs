@@ -17,5 +17,6 @@ namespace CommandLineTools.Contracts
         void DeleteFile(string path);
         byte[] ReadAllBytes(string path);
         void WriteAllBytes(string path, byte[] arr);
+        void CopyDirectory(string sourcePath, string destinationPath);
     }
 }
