@@ -8,10 +8,10 @@ using CommandLineTools.Contracts;
 
 namespace CommandLineTools.Tools
 {
-    public class RemoveLines : CommandLineFileTool
+    public class RemoveLines : CommandLineFileTool, ICommandLineTool<RemoveLinesOptions>
     {
         private const int LineParallelThreshold = 100000; //100k
-        public RemoveLines(IFileService fileService) : base(fileService)
+        public RemoveLines()
         {
 
         }

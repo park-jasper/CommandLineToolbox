@@ -15,18 +15,36 @@ namespace CommandLineTools
 
         public void Run(string[] args)
         {
+            var fs = _fileService;
             Parser
                 .Default
-                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions, StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions>(args)
-                .MapResult(
-                    (InFileReplaceOptions opt) => new InFileReplace(_fileService).ExecuteCommand(opt),
-                    (RemoveLinesOptions opt) => new RemoveLines(_fileService).ExecuteCommand(opt),
-                    (ExecuteBatchOptions opt) => new ExecuteBatch(_fileService).ExecuteCommand(opt),
-                    (StatisticalTableOptions opt) => new StatisticalTable(_fileService).ExecuteCommand(opt),
-                    (StatisticalFunctionsOptions opt) => new StatisticalFunctions().ExecuteCommand(opt),
-                    (SqlPlotToolsHackOptions opt) => new SqlPlotToolsHack(_fileService).ExecuteCommand(opt),
-                    (CryptoOptions opt) => new CryptoTool(_fileService).ExecuteCommand(opt),
-                    errs => 1);
+                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions,
+                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions>(args)
+                .WithParsed<InFileReplaceOptions, InFileReplace>(fs)
+                .WithParsed<RemoveLinesOptions, RemoveLines>(fs)
+                .WithParsed<ExecuteBatchOptions, ExecuteBatch>(fs)
+                .WithParsed<StatisticalTableOptions, StatisticalTable>(fs)
+                .WithParsed<StatisticalFunctionsOptions, StatisticalFunctions>(fs)
+                .WithParsed<SqlPlotToolsHackOptions, SqlPlotToolsHack>(fs)
+                .WithParsed<CryptoOptions, CryptoTool>(fs)
+                .WithParsed<TryCopyOptions, TryCopyTool>(fs)
+                .WithParsed<TestOptions, TestTool>(fs);
+        }
+    }
+
+    public static class CommandLineToolsExtensions
+    {
+        public static ParserResult<object> WithParsed<TOptions, TClass>(this ParserResult<object> result, IFileService fs) where TClass : ICommandLineTool<TOptions>, new()
+        {
+            return result.WithParsed<TOptions>(opt =>
+            {
+                var tool = new TClass();
+                if (tool is CommandLineFileTool fileTool)
+                {
+                    fileTool.SetFileService(fs);
+                }
+                tool.ExecuteCommand(opt);
+            });
         }
     }
 }

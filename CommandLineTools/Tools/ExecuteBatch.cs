@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace CommandLineTools.Tools
 {
-    public class ExecuteBatch : CommandLineFileTool
+    public class ExecuteBatch : CommandLineFileTool, ICommandLineTool<ExecuteBatchOptions>
     {
-        public ExecuteBatch(IFileService fileService) : base(fileService)
+        public ExecuteBatch()
         {
 
         }

@@ -7,7 +7,7 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class StatisticalFunctions
+    public class StatisticalFunctions : ICommandLineTool<StatisticalFunctionsOptions>
     {
         private VerboseLogger Log;
         public int ExecuteCommand(StatisticalFunctionsOptions options)

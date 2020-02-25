@@ -3,9 +3,9 @@ using CommandLineTools.Contracts;
 
 namespace CommandLineTools.Tools
 {
-    public class InFileReplace : CommandLineFileTool
+    public class InFileReplace : CommandLineFileTool, ICommandLineTool<InFileReplaceOptions>
     {
-        public InFileReplace(IFileService fileService) : base(fileService)
+        public InFileReplace()
         {
 
         }

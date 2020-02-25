@@ -7,9 +7,9 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class SqlPlotToolsHack : CommandLineFileTool
+    public class SqlPlotToolsHack : CommandLineFileTool, ICommandLineTool<SqlPlotToolsHackOptions>
     {
-        public SqlPlotToolsHack(IFileService fileService) : base(fileService)
+        public SqlPlotToolsHack()
         {
         }
 

@@ -5,10 +5,10 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class CryptoTool : CommandLineFileTool
+    public class CryptoTool : CommandLineFileTool, ICommandLineTool<CryptoOptions>
     {
         public const string EncryptedPostfix = ".encrypted";
-        public CryptoTool(IFileService fileService) : base(fileService)
+        public CryptoTool()
         {
         }
 
