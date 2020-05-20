@@ -164,7 +164,7 @@ namespace CommandLineTools
         public string DatabaseTable { get; set; }
     }
 
-    [Verb("crypto", HelpText = "encrypt or decrypt files with the twoFish algorithm")]
+    [Verb("crypto", HelpText = "encrypt or decrypt files with the AES algorithm")]
     public class CryptoOptions : BaseOptions
     {
         [Option('i', "in", Required = true, HelpText = "File to encrypt or decrypt")]

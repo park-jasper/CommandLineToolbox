@@ -80,7 +80,7 @@ namespace CommandLineTools.Tools
         public int ExecuteCommand(CryptoOptions options)
         {
             var log = new VerboseLogger(options);
-            var twoFish = new AESCryptor();
+            var aesCryptor = new AESCryptor();
             var password = GetPassword();
             if (string.IsNullOrEmpty(options.OutputFile))
             {
@@ -89,13 +89,13 @@ namespace CommandLineTools.Tools
             if (options.Encrypt)
             {
                 var input = _fileService.ReadAllText(options.InputFile);
-                var result = twoFish.Encrypt(input, password);
+                var result = aesCryptor.Encrypt(input, password);
                 _fileService.WriteAllBytes(options.OutputFile, result);
             }
             else if (options.Decrypt)
             {
                 var input = _fileService.ReadAllBytes(options.InputFile);
-                var result = twoFish.Decrypt(input, password);
+                var result = aesCryptor.Decrypt(input, password);
                 _fileService.WriteAllText(options.OutputFile, result);
             }
             else
