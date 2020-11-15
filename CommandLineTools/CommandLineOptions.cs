@@ -20,9 +20,14 @@ namespace CommandLineTools
         public bool DebugLog { get; set; }
     }
 
+    public abstract class FileOptions : BaseOptions
+    {
+        [Option('o', "out", Required = false, HelpText = CommandLineOptions.OutFileHelpText)]
+        public string OutputFile { get; set; }
+    }
 
     [Verb("inFileReplace", HelpText = "Replace every occurence of a string in a file with a new string")]
-    public class InFileReplaceOptions : BaseOptions
+    public class InFileReplaceOptions : FileOptions
     {
         [Option('f', "find", Required = true, HelpText = "The text to replace in the file")]
         public string TextToFind { get; set; }
@@ -30,15 +35,15 @@ namespace CommandLineTools
         public string ReplacementText { get; set; }
         [Option('n', "parseAsNewline", Required = false, HelpText = "Give a unique sequence of characters that will internally be replaced with the char sequence for 'newline'")]
         public string ParseAsNewline { get; set; }
+        [Option('s', "parseAsSpace", Required = false, HelpText = "Give a unique sequence of characters that will internally be replaced with a space")]
+        public string ParseAsSpace { get; set; }
 
         [Option('i', "in", Required = true, HelpText = CommandLineOptions.InFileHelpText + "find and replace text")]
         public string InputFile { get; set; }
-        [Option('o', "out", Required = false, HelpText = CommandLineOptions.OutFileHelpText)]
-        public string OutputFile { get; set; }
     }
 
     [Verb("removeLines", HelpText = "Remove all lines matching either at least one or all of the specified patterns")]
-    public class RemoveLinesOptions : BaseOptions
+    public class RemoveLinesOptions : FileOptions
     {
         [Option('p', "patterns", Required = true, HelpText = "The patterns to determine which lines are to be deleted. Write continuously separating with '#'. If Using the '#'-symbol inside a pattern is required, escape it in the pattern (e.g. '\\#'")]
         public string Patterns { get; set; }
@@ -47,8 +52,25 @@ namespace CommandLineTools
 
         [Option('i', "in", Required = true, HelpText = CommandLineOptions.InFileHelpText + "remove lines")]
         public string InputFile { get; set; }
-        [Option('o', "out", Required = false, HelpText = CommandLineOptions.OutFileHelpText)]
-        public string OutputFile { get; set; }
+    }
+
+    [Verb("duplicateLines", HelpText = "Duplicates all lines --factor times")]
+    public class DuplicateLinesOptions : FileOptions
+    {
+        [Option('f', "factor", Required = true, HelpText = "How many times each lines should appear in the output file")]
+        public int Factor { get; set; }
+
+        [Option('i', "in", Required = true, HelpText = CommandLineOptions.InFileHelpText + "duplicate lines")]
+        public string InputFile { get; set; }
+    }
+
+    [Verb("zipLines")]
+    public class ZipLinesOptions : FileOptions
+    {
+        [Option('i', "in", Required = true, HelpText = "Files whose lines to zip")]
+        public IEnumerable<string> InputFiles { get; set; }
+        [Option('c', "coefficients", Required = false, HelpText = "If given says how many lines from each file are taking during each step of the zip")]
+        public IEnumerable<int> Coefficients { get; set; }
     }
 
     [Verb("executeBatch", HelpText = "Execute a number of batch instructions providing a json file execution manual")]
@@ -108,6 +130,9 @@ namespace CommandLineTools
 
         [Option("onlyGeoms", Required = false)]
         public bool OnlyGeoms { get; set; }
+
+        [Option("machine-names", Required = false)]
+        public IEnumerable<string> MachineNames { get; set; }
     }
 
     [Verb("statisticalFunctions", HelpText = "calculates various different statistical functions on a set of data")]

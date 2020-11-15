@@ -6,17 +6,21 @@ using System.Data.SQLite;
 using System.Text;
 using CommandLineTools.Helpers;
 using MoreLinq;
+using System.Threading;
+
 
 namespace CommandLineTools.Tools
 {
     public class StatisticalTable : CommandLineFileTool, ICommandLineTool<StatisticalTableOptions>
     {
+        private VerboseLogger _log;
         public StatisticalTable()
         {
         }
 
         public int ExecuteCommand(StatisticalTableOptions options)
         {
+            _log = new VerboseLogger(options);
             List<Data> data = RetrieveData(options);
 
             var secs = options.Secondaries.ToArray();
@@ -25,7 +29,11 @@ namespace CommandLineTools.Tools
             foreach (var group in grouping)
             {
                 numberOfGroups += 1;
-                var relativeOne = group.MinBy(d => d.Value);
+                if (group.First().Machine == 4)
+                {
+                    int p = 5;
+                }
+                var relativeOne = group.MinBy(d => d.Value).First();
                 relativeOne.IsRelativeOne = true;
                 foreach (var d in group)
                 {
@@ -33,17 +41,29 @@ namespace CommandLineTools.Tools
                 }
             }
 
-            var resultGrouping = data.GroupBy(d => d.Main);
+            var resultGrouping = data.GroupBy(d => d.Main + "M" + d.Machine);
             var result = resultGrouping
-                .Select(group => new DataResult
+                .Select(group => new DataResult()
                 {
-                    Main = group.Key,
+                    Main = group.First().Main,
+                    Machine = group.First().Machine,
                     MainGroup = group.First().MainGroup,
-                    GeoM = CalculateGeom(group, options, numberOfGroups),
+                    GeoM = CalculateGeom(group, options, numberOfGroups / options.DatabaseTable.Count()),
                     Data = group.OrderBy(d => d.Secondaries[0]).ToList()
-                })
-                .ToList();
-            var byGeom = result.OrderBy(dr => dr.GeoM).ToList();
+                }).ToList();
+            var totalResultGrouping = data.GroupBy(d => d.Main);
+            var totalResult = options.OnlyGeoms 
+                ? totalResultGrouping
+                    .Select(group => new DataResult()
+                    {
+                        Main = group.Key,
+                        Machine = 0,
+                        MainGroup = group.First().MainGroup,
+                        GeoM = CalculateGeom(group, options, numberOfGroups),
+                        Data = group.OrderBy(d => d.Secondaries[0]).ToList()
+                    }).ToList()
+                : result;
+            var byGeom = totalResult.OrderBy(dr => dr.GeoM).ToList();
             for (int i = 0; i < byGeom.Count; i += 1)
             {
                 byGeom[i].Rank = i + 1;
@@ -51,19 +71,23 @@ namespace CommandLineTools.Tools
 
             var sb = new StringBuilder();
 
-            CreateText(sb, options, byGeom, numberOfGroups, secs, grouping);
+            CreateText(sb, options, options.OnlyGeoms ? byGeom.Concat(result).ToList() : byGeom, numberOfGroups, secs, grouping);
 
             _fileService.WriteAllText(options.OutputFile, sb.ToString());
 
             return 0;
         }
 
-        private double CalculateGeom(IGrouping<string, Data> group, StatisticalTableOptions options, int numberOfGroups)
+        private static double CalculateGeom(IGrouping<string, Data> group, StatisticalTableOptions options, int numberOfGroups)
         {
             var relevantData = group.WhereNot(g =>
-                g.Secondaries.Any(s => options.ExcludeFromGeoM.Contains(s)) ||
+                g.Secondaries.Any(s => options.ExcludeFromGeoM.Contains(s)) &&
                 g.Machine == options.ExcludeFromGeomMachine);
             double result = 1;
+            if (group.First().Machine == 4)
+            {
+                int p = 5;
+            }
             foreach (var data in relevantData)
             {
                 result *= data.RelativeValue;
@@ -76,25 +100,64 @@ namespace CommandLineTools.Tools
             const string columnSep = "@{~~}";
             if (options.OnlyGeoms)
             {
-                sb.AppendLine(@"\begin{tabular}{ l | l || l | l }");
-                sb.AppendLine(@"Sorter&GeoM&Sorter&GeoM\\ \hline");
-                var resultLength = result.Count;
-                var halfLength = resultLength / 2;
-                for (int i = 0; i < halfLength; i += 1)
+                //sb.AppendLine(@"\begin{tabular}{ l | l || l | l }");
+                //sb.AppendLine(@"Sorter&GeoM&Sorter&GeoM\\ \hline");
+                //var resultLength = result.Count;
+                //var halfLength = resultLength / 2;
+                //for (int i = 0; i < halfLength; i += 1)
+                //{
+                //    sb.Append(GetFonted(result[i].Main, options.MainFont) + "&" + FormatDouble(result[i].GeoM, 3));
+                //    if (i + halfLength < resultLength)
+                //    {
+                //        sb.Append("&" + GetFonted(result[i + halfLength].Main, options.MainFont) + "&" + FormatDouble(result[i + halfLength].GeoM, 3));
+                //    }
+                //    else
+                //    {
+                //        sb.Append("&&");
+                //    }
+                //    sb.AppendLine(@"\\");
+                //}
+
+                //sb.AppendLine(@"\end{tabular}");
+                //return;
+
+                var byMachine = new Dictionary<int, IList<DataResult>>();
+                foreach (var res in result)
                 {
-                    sb.Append(GetFonted(result[i].Main, options.MainFont) + "&" + FormatDouble(result[i].GeoM, 3));
-                    if (i + halfLength < resultLength)
+                    if (!byMachine.ContainsKey(res.Machine))
                     {
-                        sb.Append("&" + GetFonted(result[i + halfLength].Main, options.MainFont) + "&" + FormatDouble(result[i + halfLength].GeoM, 3));
+                        _log.Info($"Adding machine {res.Machine}");
+                        byMachine[res.Machine] = new List<DataResult>();
                     }
-                    else
+                    byMachine[res.Machine].Add(res);
+                }
+                foreach (var mach in byMachine)
+                {
+                    int rank = 1;
+                    mach.Value.OrderBy(d => d.GeoM).ForEach(d =>
                     {
-                        sb.Append("&&");
-                    }
-                    sb.AppendLine(@"\\");
+                        d.Rank = rank;
+                        rank += 1;
+                    });
                 }
 
+                var numberOfColumnGroups = byMachine.Count;
+                sb.AppendLine(@"\begin{tabular}{ l | " + string.Join("|",
+                    Enumerable.Repeat(new[] { "r", "l" }, numberOfColumnGroups).SelectMany(a => a)) + " |}");
+
+                var columnGroupNames = Enumerable.Prepend(options.MachineNames, "Overall")
+                    .Select(x => @"\multicolumn{2}{c|}{" + x + "}");
+                sb.AppendLine(@"Sorter & " + string.Join("&", columnGroupNames) + @" \\");
+
+                sb.AppendLine(" & " + string.Join("&",
+                        Enumerable.Repeat(new[] { "Rank", "GeoM" }, numberOfColumnGroups).SelectMany(a => a)) + @"\\ \hline");
+
+                foreach (var ele in byMachine[0])
+                {
+                    WriteLine(sb, byMachine, ele.Main, options);
+                }
                 sb.AppendLine(@"\end{tabular}");
+
                 return;
             }
 
@@ -120,6 +183,16 @@ namespace CommandLineTools.Tools
 
 
             sb.AppendLine(@"\end{tabular}");
+        }
+
+        private static void WriteLine(StringBuilder sb, IDictionary<int, IList<DataResult>> byMachine, string key, StatisticalTableOptions options)
+        {
+            var rankAndGeom = Enumerable
+                .Range(0, byMachine.Count)
+                .Select(mach => byMachine[mach].First(d => d.Main == key))
+                .SelectMany(d => new[] { d.Rank.ToString(), FormatDouble(d.GeoM) });
+            var text = string.Join("&", Enumerable.Prepend(rankAndGeom, GetFonted(key, options.MainFont)));
+            sb.AppendLine(text + @"\\");
         }
 
         private static void AppendLines(StringBuilder sb, IEnumerable<DataResult> result, StatisticalTableOptions options, bool lastBlock)
@@ -151,8 +224,9 @@ namespace CommandLineTools.Tools
             {
                 connection.Open();
                 var secondaries = string.Join(",", options.Secondaries);
+                //string cText = $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, _machine, {secondaries}{GetMainGroup(options)} FROM {GetUnion(options.DatabaseTable)} group by _machine, {options.Main}, {secondaries}";
                 string cText =
-                    $"SELECT {options.Main} as _main, {metric}({options.Value}) as _value, _machine, {secondaries}{GetMainGroup(options)} FROM {GetUnion(options.DatabaseTable)} group by {options.Main}, {secondaries}";
+                    $"SELECT {options.Main} as _main, _value, _machine, {secondaries}{GetMainGroup(options)} FROM {GetUnion(options.DatabaseTable, options.Main, secondaries, metric, options.Value)}";
 
                 if (options.Verbose)
                 {
@@ -209,6 +283,30 @@ namespace CommandLineTools.Tools
                 }
 
                 sb.AppendLine($"SELECT *, {i} as _machine FROM {t}");
+                i += 1;
+            }
+            sb.Append(")");
+            return sb.ToString();
+        }
+
+        public static string GetUnion(IEnumerable<string> tables, string main, string secondaries, string metric, string value)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("(");
+            bool first = true;
+            int i = 1;
+            foreach (var t in tables)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    sb.AppendLine("UNION");
+                }
+
+                sb.AppendLine($"SELECT *, {i} as _machine FROM (SELECT *, {metric}({value}) as _value FROM {t} GROUP BY {main}, {secondaries})");
                 i += 1;
             }
             sb.Append(")");
@@ -281,6 +379,7 @@ namespace CommandLineTools.Tools
         private class DataResult
         {
             public string Main { get; set; }
+            public int Machine { get; set; }
             public string MainGroup { get; set; }
             public double GeoM { get; set; }
             public List<Data> Data { get; set; }

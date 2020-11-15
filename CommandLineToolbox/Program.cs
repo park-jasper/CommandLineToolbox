@@ -19,6 +19,25 @@ namespace CommandLineToolbox
             //var (ds, hs) = Test("Tol_Rod.csv", 2);
             //File.WriteAllText("out.txt", string.Join(Environment.NewLine, new[] { "Dia Ring " + dr, "Height Right " + hr, "Dia Rod " + ds, "Height Rod " + hs }));
             //return;
+            if (args.Contains("--verbose"))
+            {
+                Console.WriteLine("Current Arguments: " + string.Join(" ", args));
+            }
+#if DEBUG
+            if (Debugger.IsAttached)
+            {
+                args = new[]
+                {
+                    "inFileReplace",
+                    "--in=inFileReplaceTest.txt",
+                    "--out=inFileReplaceTestOut.txt",
+                    "--parseAsNewline=NL",
+                    "--parseAsSpace=SPACE",
+                    "--find=NL",
+                    "--replaceWith=SPACE",
+                };
+            }
+#endif
             new CommandLineTools
                 .CommandLineTools(new FileService())
                 .Run(args);
@@ -44,7 +63,7 @@ namespace CommandLineToolbox
                     }
                 }
             }
-            catch (Exception exc)
+            catch (Exception)
             {
 
             }

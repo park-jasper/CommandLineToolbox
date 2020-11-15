@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using CommandLineTools.Contracts;
 using CommandLineTools.Domain;
 using CommandLineTools.Helpers;
@@ -82,6 +83,7 @@ namespace CommandLineTools.Tools
             var log = new VerboseLogger(options);
             var aesCryptor = new AESCryptor();
             var password = GetPassword();
+            int resultLength = -1;
             if (string.IsNullOrEmpty(options.OutputFile))
             {
                 GenerateOutputFileName(options);
@@ -96,6 +98,7 @@ namespace CommandLineTools.Tools
             {
                 var input = _fileService.ReadAllBytes(options.InputFile);
                 var result = aesCryptor.Decrypt(input, password);
+                resultLength = result.Length;
                 _fileService.WriteAllText(options.OutputFile, result);
             }
             else
@@ -114,6 +117,10 @@ namespace CommandLineTools.Tools
                 Console.WriteLine(
                     "File encrypted/decrypted. Get the information. When you press any button in this window the temporary file will be deleted");
                 Console.ReadKey(true);
+                if (resultLength > 0)
+                {
+                    _fileService.WriteAllText(options.OutputFile, GetDummyText(resultLength));
+                }
                 _fileService.DeleteFile(options.OutputFile);
             }
             else if (!options.Keep)
@@ -146,6 +153,20 @@ namespace CommandLineTools.Tools
                 }
             }
             return password;
+        }
+
+        private string GetDummyText(int length)
+        {
+            var builder = new StringBuilder(length);
+            var segment = "trololololo-hahahahaha-";
+            var written = 0;
+            while (written + segment.Length < length)
+            {
+                builder.Append(segment);
+                written += segment.Length;
+            }
+            builder.Append(segment.Substring(0, length - written));
+            return builder.ToString();
         }
     }
 }

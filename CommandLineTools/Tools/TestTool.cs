@@ -47,8 +47,8 @@ namespace CommandLineTools.Tools
                     var snTypes = sized.Where(d => d.Sorter.Contains(options.SnFilter));
                     var isTypes = sized.Where(d => d.Sorter.Contains(options.IsFilter));
 
-                    var bestSn = snTypes.MinBy(d => d.Average);
-                    var bestIs = isTypes.MinBy(d => d.Average);
+                    var bestSn = snTypes.MinBy(d => d.Average).First();
+                    var bestIs = isTypes.MinBy(d => d.Average).First();
 
                     row.Values.Add(new MachineRow.RowEntry()
                     {

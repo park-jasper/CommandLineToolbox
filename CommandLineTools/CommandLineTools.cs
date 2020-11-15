@@ -1,6 +1,7 @@
 ﻿using System;
 using CommandLine;
 using CommandLineTools.Contracts;
+using CommandLineTools.Options;
 using CommandLineTools.Tools;
 
 namespace CommandLineTools
@@ -18,17 +19,20 @@ namespace CommandLineTools
             var fs = _fileService;
             Parser
                 .Default
-                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, ExecuteBatchOptions, StatisticalTableOptions,
-                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions>(args)
+                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, DuplicateLinesOptions,ZipLinesOptions, ExecuteBatchOptions, StatisticalTableOptions,
+                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions, PasswordGenerationOptions>(args)
                 .WithParsed<InFileReplaceOptions, InFileReplace>(fs)
                 .WithParsed<RemoveLinesOptions, RemoveLines>(fs)
+                .WithParsed<DuplicateLinesOptions, DuplicateLinesTool>(fs)
+                .WithParsed<ZipLinesOptions, ZipLines>(fs)
                 .WithParsed<ExecuteBatchOptions, ExecuteBatch>(fs)
                 .WithParsed<StatisticalTableOptions, StatisticalTable>(fs)
                 .WithParsed<StatisticalFunctionsOptions, StatisticalFunctions>(fs)
                 .WithParsed<SqlPlotToolsHackOptions, SqlPlotToolsHack>(fs)
                 .WithParsed<CryptoOptions, CryptoTool>(fs)
                 .WithParsed<TryCopyOptions, TryCopyTool>(fs)
-                .WithParsed<TestOptions, TestTool>(fs);
+                .WithParsed<TestOptions, TestTool>(fs)
+                .WithParsed<PasswordGenerationOptions, PasswordGeneration>(fs);
         }
     }
 

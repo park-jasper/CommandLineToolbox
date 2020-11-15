@@ -13,11 +13,18 @@ namespace CommandLineTools.Tools
         public int ExecuteCommand(InFileReplaceOptions options)
         {
             var input = _fileService.ReadAllText(options.InputFile);
-            if (!string.IsNullOrEmpty(options.ParseAsNewline))
+
+            void ReplaceIf(string parseAs, string newValue)
             {
-                options.TextToFind = options.TextToFind.Replace(options.ParseAsNewline, Environment.NewLine);
-                options.ReplacementText = options.ReplacementText.Replace(options.ParseAsNewline, Environment.NewLine);
+                if (!string.IsNullOrEmpty(parseAs))
+                {
+                    options.TextToFind = options.TextToFind.Replace(parseAs, newValue);
+                    options.ReplacementText = options.ReplacementText.Replace(parseAs, newValue);
+                }
             }
+
+            ReplaceIf(options.ParseAsNewline, Environment.NewLine);
+            ReplaceIf(options.ParseAsSpace, " ");
             var replaced = input.Replace(options.TextToFind, options.ReplacementText);
             var destination = options.OutputFile ?? options.InputFile;
             _fileService.WriteAllText(destination, replaced);

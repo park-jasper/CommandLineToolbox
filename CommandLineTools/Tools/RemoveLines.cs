@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommandLineTools.Contracts;
+using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
@@ -18,6 +19,8 @@ namespace CommandLineTools.Tools
 
         public int ExecuteCommand(RemoveLinesOptions options)
         {
+            var log = new VerboseLogger(options);
+            log.Info($"Reading file {options.InputFile}");
             var input = _fileService.ReadLinesLazily(options.InputFile);
             var patternsConcatenated = options.Patterns;
             patternsConcatenated = patternsConcatenated.Replace("\\#", " ");
@@ -28,8 +31,12 @@ namespace CommandLineTools.Tools
             }
 
             var matches = MatchesPatterns(patterns, options.ConjunctivePatterns);
-            _fileService.WriteAllLines(options.OutputFile ?? options.InputFile,
-                input.Where(x => !matches(x)));
+            var remaining = input.Where(x => !matches(x));
+            if (options.OutputFile == null || options.OutputFile == options.InputFile)
+            {
+                remaining = remaining.ToList();
+            }
+            _fileService.WriteAllLines(options.OutputFile ?? options.InputFile, remaining);
             
             //List<string>[] result;
             //List<string> compare = new List<string>();
