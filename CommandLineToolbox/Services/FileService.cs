@@ -54,5 +54,10 @@ namespace CommandLineToolbox.Services
                 file.CopyTo(Path.Combine(dest.FullName, file.Name));
             }
         }
+
+        public string GetFullPath(string path)
+        {
+            return Path.GetFullPath(path);
+        }
     }
 }

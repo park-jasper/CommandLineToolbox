@@ -5,7 +5,7 @@ namespace CommandLineTools.Tools
 {
     public abstract class CommandLineFileTool
     {
-        protected IFileService _fileService;
+        protected IFileService FileService;
 
         protected CommandLineFileTool()
         {
@@ -14,7 +14,11 @@ namespace CommandLineTools.Tools
 
         public void SetFileService(IFileService fileService)
         {
-            _fileService = fileService;
+            FileService = fileService;
         }
+    }
+    public abstract class CommandLineFileTool<TOptions> : CommandLineFileTool, ICommandLineTool<TOptions>
+    {
+        public abstract int ExecuteCommand(TOptions options);
     }
 }

@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace CommandLineTools.Tools
 {
-    public class ZipLines : CommandLineFileTool, ICommandLineTool<ZipLinesOptions>
+    public class ZipLines : CommandLineFileTool<ZipLinesOptions>
     {
-        public int ExecuteCommand(ZipLinesOptions options)
+        public override int ExecuteCommand(ZipLinesOptions options)
         {
             var log = new VerboseLogger(options);
-            var inputStreams = options.InputFiles.Select(f => _fileService.ReadLinesLazily(f).GetEnumerator()).ToList();
+            var inputStreams = options.InputFiles.Select(f => FileService.ReadLinesLazily(f).GetEnumerator()).ToList();
             var coeffs = (options.Coefficients ?? Enumerable.Repeat(1, inputStreams.Count)).ToArray();
 
             
@@ -37,7 +37,7 @@ namespace CommandLineTools.Tools
                     }
                 }
             }
-            _fileService.WriteAllLines(options.OutputFile, result);
+            FileService.WriteAllLines(options.OutputFile, result);
             return 0;
         }
     }

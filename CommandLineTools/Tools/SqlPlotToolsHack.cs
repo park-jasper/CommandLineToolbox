@@ -7,15 +7,15 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class SqlPlotToolsHack : CommandLineFileTool, ICommandLineTool<SqlPlotToolsHackOptions>
+    public class SqlPlotToolsHack : CommandLineFileTool<SqlPlotToolsHackOptions>
     {
         public SqlPlotToolsHack()
         {
         }
 
-        public int ExecuteCommand(SqlPlotToolsHackOptions options)
+        public override int ExecuteCommand(SqlPlotToolsHackOptions options)
         {
-            var input = _fileService.ReadLinesLazily(options.InputFile);
+            var input = FileService.ReadLinesLazily(options.InputFile);
             using (var connection = SQLiteHelpers.CreateConnection(options.DatabaseFile))
             {
                 connection.Open();

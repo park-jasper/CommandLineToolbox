@@ -9,7 +9,7 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class RemoveLines : CommandLineFileTool, ICommandLineTool<RemoveLinesOptions>
+    public class RemoveLines : CommandLineFileTool<RemoveLinesOptions>
     {
         private const int LineParallelThreshold = 100000; //100k
         public RemoveLines()
@@ -17,11 +17,11 @@ namespace CommandLineTools.Tools
 
         }
 
-        public int ExecuteCommand(RemoveLinesOptions options)
+        public override int ExecuteCommand(RemoveLinesOptions options)
         {
             var log = new VerboseLogger(options);
             log.Info($"Reading file {options.InputFile}");
-            var input = _fileService.ReadLinesLazily(options.InputFile);
+            var input = FileService.ReadLinesLazily(options.InputFile);
             var patternsConcatenated = options.Patterns;
             patternsConcatenated = patternsConcatenated.Replace("\\#", " ");
             var patterns = patternsConcatenated.Split('#');
@@ -36,7 +36,7 @@ namespace CommandLineTools.Tools
             {
                 remaining = remaining.ToList();
             }
-            _fileService.WriteAllLines(options.OutputFile ?? options.InputFile, remaining);
+            FileService.WriteAllLines(options.OutputFile ?? options.InputFile, remaining);
             
             //List<string>[] result;
             //List<string> compare = new List<string>();

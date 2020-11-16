@@ -6,7 +6,7 @@ using CommandLineTools.Helpers;
 
 namespace CommandLineTools.Tools
 {
-    public class CryptoTool : CommandLineFileTool, ICommandLineTool<CryptoOptions>
+    public class CryptoTool : CommandLineFileTool<CryptoOptions>
     {
         public const string EncryptedPostfix = ".encrypted";
         public CryptoTool()
@@ -17,7 +17,7 @@ namespace CommandLineTools.Tools
         {
             if (options.Encrypt)
             {
-                if (!_fileService.Exists(options.InputFile + EncryptedPostfix))
+                if (!FileService.Exists(options.InputFile + EncryptedPostfix))
                 {
                     options.OutputFile = options.InputFile + EncryptedPostfix;
                 }
@@ -27,7 +27,7 @@ namespace CommandLineTools.Tools
                     while (true)
                     {
                         var combinedName = $"{options.InputFile}_{counter}{EncryptedPostfix}";
-                        if (!_fileService.Exists(combinedName))
+                        if (!FileService.Exists(combinedName))
                         {
                             options.OutputFile = combinedName;
                             break;
@@ -45,7 +45,7 @@ namespace CommandLineTools.Tools
                     {
                         withoutName += ".decrypted";
                     }
-                    if (!_fileService.Exists(withoutName))
+                    if (!FileService.Exists(withoutName))
                     {
                         options.OutputFile = withoutName;
                     }
@@ -62,7 +62,7 @@ namespace CommandLineTools.Tools
                         while (true)
                         {
                             var combinedName = $"{namePart}_{counter}.{extensionPart}";
-                            if (!_fileService.Exists(combinedName))
+                            if (!FileService.Exists(combinedName))
                             {
                                 options.OutputFile = combinedName;
                                 break;
@@ -78,7 +78,7 @@ namespace CommandLineTools.Tools
             }
         }
 
-        public int ExecuteCommand(CryptoOptions options)
+        public override int ExecuteCommand(CryptoOptions options)
         {
             var log = new VerboseLogger(options);
             var aesCryptor = new AESCryptor();
@@ -90,16 +90,16 @@ namespace CommandLineTools.Tools
             }
             if (options.Encrypt)
             {
-                var input = _fileService.ReadAllText(options.InputFile);
+                var input = FileService.ReadAllText(options.InputFile);
                 var result = aesCryptor.Encrypt(input, password);
-                _fileService.WriteAllBytes(options.OutputFile, result);
+                FileService.WriteAllBytes(options.OutputFile, result);
             }
             else if (options.Decrypt)
             {
-                var input = _fileService.ReadAllBytes(options.InputFile);
+                var input = FileService.ReadAllBytes(options.InputFile);
                 var result = aesCryptor.Decrypt(input, password);
                 resultLength = result.Length;
-                _fileService.WriteAllText(options.OutputFile, result);
+                FileService.WriteAllText(options.OutputFile, result);
             }
             else
             {
@@ -119,13 +119,13 @@ namespace CommandLineTools.Tools
                 Console.ReadKey(true);
                 if (resultLength > 0)
                 {
-                    _fileService.WriteAllText(options.OutputFile, GetDummyText(resultLength));
+                    FileService.WriteAllText(options.OutputFile, GetDummyText(resultLength));
                 }
-                _fileService.DeleteFile(options.OutputFile);
+                FileService.DeleteFile(options.OutputFile);
             }
             else if (!options.Keep)
             {
-                _fileService.DeleteFile(options.InputFile);
+                FileService.DeleteFile(options.InputFile);
             }
 
             return 0;

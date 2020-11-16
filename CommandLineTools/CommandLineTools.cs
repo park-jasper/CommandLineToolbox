@@ -20,7 +20,7 @@ namespace CommandLineTools
             Parser
                 .Default
                 .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, DuplicateLinesOptions,ZipLinesOptions, ExecuteBatchOptions, StatisticalTableOptions,
-                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions, PasswordGenerationOptions>(args)
+                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions, PasswordGenerationOptions, StrongNameOptions>(args)
                 .WithParsed<InFileReplaceOptions, InFileReplace>(fs)
                 .WithParsed<RemoveLinesOptions, RemoveLines>(fs)
                 .WithParsed<DuplicateLinesOptions, DuplicateLinesTool>(fs)
@@ -32,7 +32,8 @@ namespace CommandLineTools
                 .WithParsed<CryptoOptions, CryptoTool>(fs)
                 .WithParsed<TryCopyOptions, TryCopyTool>(fs)
                 .WithParsed<TestOptions, TestTool>(fs)
-                .WithParsed<PasswordGenerationOptions, PasswordGeneration>(fs);
+                .WithParsed<PasswordGenerationOptions, PasswordGeneration>(fs)
+                .WithParsed<StrongNameOptions, StrongNameTool>(fs);
         }
     }
 

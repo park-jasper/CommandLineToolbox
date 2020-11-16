@@ -5,10 +5,10 @@ using System.Text;
 
 namespace CommandLineTools.Tools
 {
-    public class TryCopyTool : CommandLineFileTool, ICommandLineTool<TryCopyOptions>
+    public class TryCopyTool : CommandLineFileTool<TryCopyOptions>
     {
 
-        public int ExecuteCommand(TryCopyOptions options)
+        public override int ExecuteCommand(TryCopyOptions options)
         {
             if (options.NeverFail)
             {
@@ -29,7 +29,7 @@ namespace CommandLineTools.Tools
         {
             if (options.IsDirectory)
             {
-                _fileService.CopyDirectory(options.SourcePath, options.DestinationPath);
+                FileService.CopyDirectory(options.SourcePath, options.DestinationPath);
             }
 
             return false;

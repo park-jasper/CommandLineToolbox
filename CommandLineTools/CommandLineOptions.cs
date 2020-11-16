@@ -244,4 +244,11 @@ namespace CommandLineTools
         [Option('o', "out")]
         public string OutputFilePath { get; set; }
     }
+
+    [Verb("strong-name", HelpText = "Get the strong name for a .net assembly")]
+    public class StrongNameOptions : BaseOptions
+    {
+        [Option('a', "assembly", Required = true)]
+        public string Name { get; set; }
+    }
 }

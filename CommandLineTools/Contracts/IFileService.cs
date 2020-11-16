@@ -18,5 +18,6 @@ namespace CommandLineTools.Contracts
         byte[] ReadAllBytes(string path);
         void WriteAllBytes(string path, byte[] arr);
         void CopyDirectory(string sourcePath, string destinationPath);
+        string GetFullPath(string path);
     }
 }

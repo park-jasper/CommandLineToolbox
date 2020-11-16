@@ -11,14 +11,14 @@ using System.Threading;
 
 namespace CommandLineTools.Tools
 {
-    public class StatisticalTable : CommandLineFileTool, ICommandLineTool<StatisticalTableOptions>
+    public class StatisticalTable : CommandLineFileTool<StatisticalTableOptions>
     {
         private VerboseLogger _log;
         public StatisticalTable()
         {
         }
 
-        public int ExecuteCommand(StatisticalTableOptions options)
+        public override int ExecuteCommand(StatisticalTableOptions options)
         {
             _log = new VerboseLogger(options);
             List<Data> data = RetrieveData(options);
@@ -29,10 +29,6 @@ namespace CommandLineTools.Tools
             foreach (var group in grouping)
             {
                 numberOfGroups += 1;
-                if (group.First().Machine == 4)
-                {
-                    int p = 5;
-                }
                 var relativeOne = group.MinBy(d => d.Value).First();
                 relativeOne.IsRelativeOne = true;
                 foreach (var d in group)
@@ -73,7 +69,7 @@ namespace CommandLineTools.Tools
 
             CreateText(sb, options, options.OnlyGeoms ? byGeom.Concat(result).ToList() : byGeom, numberOfGroups, secs, grouping);
 
-            _fileService.WriteAllText(options.OutputFile, sb.ToString());
+            FileService.WriteAllText(options.OutputFile, sb.ToString());
 
             return 0;
         }
@@ -84,10 +80,6 @@ namespace CommandLineTools.Tools
                 g.Secondaries.Any(s => options.ExcludeFromGeoM.Contains(s)) &&
                 g.Machine == options.ExcludeFromGeomMachine);
             double result = 1;
-            if (group.First().Machine == 4)
-            {
-                int p = 5;
-            }
             foreach (var data in relevantData)
             {
                 result *= data.RelativeValue;

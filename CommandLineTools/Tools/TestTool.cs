@@ -9,13 +9,13 @@ using MoreLinq;
 
 namespace CommandLineTools.Tools
 {
-    public class TestTool : CommandLineFileTool, ICommandLineTool<TestOptions>
+    public class TestTool : CommandLineFileTool<TestOptions>
     {
         public TestTool()
         {
         }
 
-        public int ExecuteCommand(TestOptions options)
+        public override int ExecuteCommand(TestOptions options)
         {
             var data = RetrieveData(options);
 
@@ -73,7 +73,7 @@ namespace CommandLineTools.Tools
 
             CreateText(sb, result, arraySizeAverages);
 
-            _fileService.WriteAllText(options.OutputFilePath, sb.ToString());
+            FileService.WriteAllText(options.OutputFilePath, sb.ToString());
 
             return 0;
         }

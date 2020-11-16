@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace CommandLineTools.Tools
 {
-    public class DuplicateLinesTool : CommandLineFileTool, ICommandLineTool<DuplicateLinesOptions>
+    public class DuplicateLinesTool : CommandLineFileTool<DuplicateLinesOptions>
     {
-        public int ExecuteCommand(DuplicateLinesOptions options)
+        public override int ExecuteCommand(DuplicateLinesOptions options)
         {
             var log = new VerboseLogger(options);
             if (options.Factor <= 1)
@@ -13,9 +13,9 @@ namespace CommandLineTools.Tools
                 log.Error("Please specify a factor greater than 1");
             }
             log.Info($"reading file {options.InputFile}");
-            var lines = _fileService.ReadLinesLazily(options.InputFile);
+            var lines = FileService.ReadLinesLazily(options.InputFile);
             var duplicated = lines.SelectMany(l => Enumerable.Repeat(l, options.Factor));
-            _fileService.WriteAllLines(options.OutputFile, duplicated);
+            FileService.WriteAllLines(options.OutputFile, duplicated);
             return 0;
         }
     }

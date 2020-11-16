@@ -3,16 +3,16 @@ using CommandLineTools.Contracts;
 
 namespace CommandLineTools.Tools
 {
-    public class InFileReplace : CommandLineFileTool, ICommandLineTool<InFileReplaceOptions>
+    public class InFileReplace : CommandLineFileTool<InFileReplaceOptions>
     {
         public InFileReplace()
         {
 
         }
 
-        public int ExecuteCommand(InFileReplaceOptions options)
+        public override int ExecuteCommand(InFileReplaceOptions options)
         {
-            var input = _fileService.ReadAllText(options.InputFile);
+            var input = FileService.ReadAllText(options.InputFile);
 
             void ReplaceIf(string parseAs, string newValue)
             {
@@ -27,7 +27,7 @@ namespace CommandLineTools.Tools
             ReplaceIf(options.ParseAsSpace, " ");
             var replaced = input.Replace(options.TextToFind, options.ReplacementText);
             var destination = options.OutputFile ?? options.InputFile;
-            _fileService.WriteAllText(destination, replaced);
+            FileService.WriteAllText(destination, replaced);
             return 0;
         }
     }

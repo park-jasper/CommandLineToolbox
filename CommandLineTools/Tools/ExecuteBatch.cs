@@ -4,16 +4,16 @@ using Newtonsoft.Json;
 
 namespace CommandLineTools.Tools
 {
-    public class ExecuteBatch : CommandLineFileTool, ICommandLineTool<ExecuteBatchOptions>
+    public class ExecuteBatch : CommandLineFileTool<ExecuteBatchOptions>
     {
         public ExecuteBatch()
         {
 
         }
 
-        public int ExecuteCommand(ExecuteBatchOptions options)
+        public override int ExecuteCommand(ExecuteBatchOptions options)
         {
-            var batchInstructionsText = _fileService.ReadAllText(options.InstructionFile);
+            var batchInstructionsText = FileService.ReadAllText(options.InstructionFile);
             var test = new List<BatchInstruction>()
             {
                 new BatchInstruction { Location = "someString", Command = "SomeBommand" }
