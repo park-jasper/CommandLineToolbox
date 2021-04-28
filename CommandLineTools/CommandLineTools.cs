@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CommandLine;
 using CommandLineTools.Contracts;
 using CommandLineTools.Options;
@@ -16,24 +17,25 @@ namespace CommandLineTools
 
         public void Run(string[] args)
         {
-            var fs = _fileService;
             Parser
                 .Default
-                .ParseArguments<InFileReplaceOptions, RemoveLinesOptions, DuplicateLinesOptions,ZipLinesOptions, ExecuteBatchOptions, StatisticalTableOptions,
-                    StatisticalFunctionsOptions, SqlPlotToolsHackOptions, CryptoOptions, TryCopyOptions, TestOptions, PasswordGenerationOptions, StrongNameOptions>(args)
-                .WithParsed<InFileReplaceOptions, InFileReplace>(fs)
-                .WithParsed<RemoveLinesOptions, RemoveLines>(fs)
-                .WithParsed<DuplicateLinesOptions, DuplicateLinesTool>(fs)
-                .WithParsed<ZipLinesOptions, ZipLines>(fs)
-                .WithParsed<ExecuteBatchOptions, ExecuteBatch>(fs)
-                .WithParsed<StatisticalTableOptions, StatisticalTable>(fs)
-                .WithParsed<StatisticalFunctionsOptions, StatisticalFunctions>(fs)
-                .WithParsed<SqlPlotToolsHackOptions, SqlPlotToolsHack>(fs)
-                .WithParsed<CryptoOptions, CryptoTool>(fs)
-                .WithParsed<TryCopyOptions, TryCopyTool>(fs)
-                .WithParsed<TestOptions, TestTool>(fs)
-                .WithParsed<PasswordGenerationOptions, PasswordGeneration>(fs)
-                .WithParsed<StrongNameOptions, StrongNameTool>(fs);
+                .Builder(_fileService)
+                .WithTool<InFileReplaceOptions, InFileReplace>()
+                .WithTool<RemoveLinesOptions, RemoveLines>()
+                .WithTool<DuplicateLinesOptions, DuplicateLinesTool>()
+                .WithTool<ZipLinesOptions, ZipLines>()
+                .WithTool<ExecuteBatchOptions, ExecuteBatch>()
+                .WithTool<StatisticalTableOptions, StatisticalTable>()
+                .WithTool<StatisticalFunctionsOptions, StatisticalFunctions>()
+                .WithTool<SqlPlotToolsHackOptions, SqlPlotToolsHack>()
+                .WithTool<CryptoOptions, CryptoTool>()
+                .WithTool<TryCopyOptions, TryCopyTool>()
+                .WithTool<TestOptions, TestTool>()
+                .WithTool<PasswordGenerationOptions, PasswordGeneration>()
+                .WithTool<StrongNameOptions, StrongNameTool>()
+                .WithTool<GetTimeDataFromLogsOptions, GetTimeDataFromLogs>()
+                .WithTool<ChecksumOptions, ChecksumTool>()
+                .Parse(args);
         }
     }
 
@@ -50,6 +52,43 @@ namespace CommandLineTools
                 }
                 tool.ExecuteCommand(opt);
             });
+        }
+
+        public static ParserBuilder Builder(this Parser parser, IFileService fs)
+        {
+            return new ParserBuilder(parser, fs);
+        }
+    }
+
+    public class ParserBuilder
+    {
+        private readonly Parser parser;
+        private readonly IFileService fileService;
+        private readonly List<Type> optionTypes = new List<Type>();
+        private readonly List<Func<ParserResult<object>, ParserResult<object>>> withParsedActions = new List<Func<ParserResult<object>, ParserResult<object>>>();
+
+        public ParserBuilder(Parser parser, IFileService fileService)
+        {
+            this.parser = parser;
+            this.fileService = fileService;
+        }
+
+        public ParserBuilder WithTool<TOptions, TTool>() where TTool : ICommandLineTool<TOptions>, new()
+        {
+            withParsedActions.Add(result => result.WithParsed<TOptions, TTool>(this.fileService));
+            optionTypes.Add(typeof(TOptions));
+            return this;
+        }
+
+        public ParserResult<object> Parse(IEnumerable<string> args)
+        {
+            var result = this.parser.ParseArguments(args, this.optionTypes.ToArray());
+            foreach (var withParsed in this.withParsedActions)
+            {
+                result = withParsed(result);
+            }
+
+            return result;
         }
     }
 }

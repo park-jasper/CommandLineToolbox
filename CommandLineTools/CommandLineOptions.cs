@@ -202,7 +202,7 @@ namespace CommandLineTools
         public bool Decrypt { get; set; }
         [Option('t', "temp", Required = false, HelpText = "Encrypt or Decrypt only until the service is shut down")]
         public bool Temporarily { get; set; }
-        [Option("keep", Required = false, HelpText = "Do not keep original file for non-temporary encryption/decryption")]
+        [Option("keep", Required = false, HelpText = "Keep original file for non-temporary encryption/decryption")]
         public bool Keep { get; set; }
     }
 
@@ -225,17 +225,17 @@ namespace CommandLineTools
     [Verb("test", HelpText = "for testing or short-term applications")]
     public class TestOptions : BaseOptions
     {
-        [Option('t', "tableName", Required = true)]
+        [Option('t', "tableName", Required = false)]
         public string TablePrefix { get; set; }
-        [Option("postFixes", Required = true)]
+        [Option("postFixes", Required = false)]
         public IEnumerable<string> TablePostfixes { get; set; }
-        [Option("snfilter", Required = true)]
+        [Option("snfilter", Required = false)]
         public string SnFilter { get; set; }
-        [Option("isfilter", Required = true)]
+        [Option("isfilter", Required = false)]
         public string IsFilter { get; set; }
         [Option("machineNames", Required = false)]
         public IEnumerable<string> MachineNames { get; set; }
-        [Option("database", Required = true)]
+        [Option("database", Required = false)]
         public string DatabaseFile { get; set; }
         [Option("arraySizeExclude")]
         public int ArraySizeExclude { get; set; }
