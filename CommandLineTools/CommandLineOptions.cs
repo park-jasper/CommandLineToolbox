@@ -189,23 +189,6 @@ namespace CommandLineTools
         public string DatabaseTable { get; set; }
     }
 
-    [Verb("crypto", HelpText = "encrypt or decrypt files with the AES algorithm")]
-    public class CryptoOptions : BaseOptions
-    {
-        [Option('i', "in", Required = true, HelpText = "File to encrypt or decrypt")]
-        public string InputFile { get; set; }
-        [Option('o', "out", Required = false, HelpText = "File to write to. If not given it is the input file with an encrypt/decrypt postfix")]
-        public string OutputFile { get; set; }
-        [Option("encrypt", Required = false, HelpText = "Encrypt the file")]
-        public bool Encrypt { get; set; }
-        [Option("decrypt", Required = false, HelpText = "Decrypt the file")]
-        public bool Decrypt { get; set; }
-        [Option('t', "temp", Required = false, HelpText = "Encrypt or Decrypt only until the service is shut down")]
-        public bool Temporarily { get; set; }
-        [Option("keep", Required = false, HelpText = "Keep original file for non-temporary encryption/decryption")]
-        public bool Keep { get; set; }
-    }
-
     [Verb("tryCopy", HelpText = "Copy if possible")]
     public class TryCopyOptions : BaseOptions
     {

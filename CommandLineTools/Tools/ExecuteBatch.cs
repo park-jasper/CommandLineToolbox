@@ -16,7 +16,7 @@ namespace CommandLineTools.Tools
             var batchInstructionsText = FileService.ReadAllText(options.InstructionFile);
             var test = new List<BatchInstruction>()
             {
-                new BatchInstruction { Location = "someString", Command = "SomeBommand" }
+                new BatchInstruction { Location = "someString", Command = "SomeCommand" }
             };
             var testText = JsonConvert.SerializeObject(test);
             var batchInstructions = JsonConvert.DeserializeObject<List<BatchInstruction>>(batchInstructionsText);
