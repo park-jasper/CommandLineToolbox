@@ -1,14 +1,16 @@
-﻿using CommandLine;
+﻿using System.Security.Cryptography;
+using CommandLine;
 
 namespace CommandLineTools.Options
 {
-    [Verb("checksum")]
+    [Verb("checksum", HelpText = "Calculate the Checksum for a file")]
     public class ChecksumOptions
     {
         public const string MD5 = "md5";
+        public const string SHA1 = "sha1";
         public const string SHA256 = "sha256";
 
-        [Option('a', "algorithm", Required = true, HelpText = "Which Hash Algorithm to use. Currently supported: '" + MD5 + "', '" + SHA256 +  "'.")]
+        [Option('a', "algorithm", Required = true, HelpText = "Which Hash Algorithm to use. Currently supported: '" + MD5 + "', '" + SHA1 + "', '" + SHA256 +  "'.")]
         public string Algorithm { get; set; }
 
         [Option('i', "inFile", Required = true, HelpText = "File of which the content is to be hashed")]

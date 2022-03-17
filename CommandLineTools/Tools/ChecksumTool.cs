@@ -15,6 +15,9 @@ namespace CommandLineTools.Tools
                 case ChecksumOptions.MD5:
                     algorithm = MD5.Create();
                     break;
+                case ChecksumOptions.SHA1:
+                    algorithm = SHA1.Create();
+                    break;
                 case ChecksumOptions.SHA256:
                     algorithm = SHA256.Create();
                     break;
