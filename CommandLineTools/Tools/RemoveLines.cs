@@ -11,7 +11,7 @@ namespace CommandLineTools.Tools
 {
     public class RemoveLines : CommandLineFileTool<RemoveLinesOptions>
     {
-        private const int LineParallelThreshold = 100000; //100k
+        private const int LineParallelThreshold = 100_000;
         public RemoveLines()
         {
 
@@ -31,7 +31,12 @@ namespace CommandLineTools.Tools
             }
 
             var matches = MatchesPatterns(patterns, options.ConjunctivePatterns);
-            var remaining = input.Where(x => !matches(x));
+            Func<string, bool> predicate = x => !matches(x);
+            if (options.KeepLines)
+            {
+                predicate = x => matches(x);
+            }
+            var remaining = input.Where(predicate);
             if (options.OutputFile == null || options.OutputFile == options.InputFile)
             {
                 remaining = remaining.ToList();

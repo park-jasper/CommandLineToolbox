@@ -47,8 +47,12 @@ namespace CommandLineTools
     {
         [Option('p', "patterns", Required = true, HelpText = "The patterns to determine which lines are to be deleted. Write continuously separating with '#'. If Using the '#'-symbol inside a pattern is required, escape it in the pattern (e.g. '\\#'")]
         public string Patterns { get; set; }
+
         [Option('c', "conjunctive", Required = false, HelpText = "If set lines will only be removed if they match ALL the patterns")]
         public bool ConjunctivePatterns { get; set; }
+
+        [Option('k', "keepLines", Required = false, HelpText = "Reverse the pattern, keep only lines that match")]
+        public bool KeepLines { get; set; }
 
         [Option('i', "in", Required = true, HelpText = CommandLineOptions.InFileHelpText + "remove lines")]
         public string InputFile { get; set; }

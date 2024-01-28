@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLineToolbox", "CommandLineToolbox\CommandLineToolbox.csproj", "{7BEEE736-A0DB-49A8-BF9D-46644CED11EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineToolbox", "CommandLineToolbox\CommandLineToolbox.csproj", "{7BEEE736-A0DB-49A8-BF9D-46644CED11EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLineTools", "CommandLineTools\CommandLineTools.csproj", "{2FFB168D-C10F-4DAA-BB66-F2D82C9A7AAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineTools", "CommandLineTools\CommandLineTools.csproj", "{2FFB168D-C10F-4DAA-BB66-F2D82C9A7AAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLineTools.Windows", "CommandLineTools.Windows\CommandLineTools.Windows.csproj", "{C295A060-021A-47F8-8047-49F91B1EF5AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChecksumApp", "ChecksumApp\ChecksumApp.csproj", "{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,16 @@ Global
 		{2FFB168D-C10F-4DAA-BB66-F2D82C9A7AAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FFB168D-C10F-4DAA-BB66-F2D82C9A7AAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FFB168D-C10F-4DAA-BB66-F2D82C9A7AAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C295A060-021A-47F8-8047-49F91B1EF5AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C295A060-021A-47F8-8047-49F91B1EF5AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C295A060-021A-47F8-8047-49F91B1EF5AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C295A060-021A-47F8-8047-49F91B1EF5AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94F27B4C-2F66-4A58-9AA9-0B8736CF9F54}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

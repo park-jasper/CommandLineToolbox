@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using CommandLineTools.Contracts;
 using CommandLineTools.Helpers;
+using MathNet.Numerics;
 using MoreLinq;
 
 namespace CommandLineTools.Tools
@@ -17,6 +18,8 @@ namespace CommandLineTools.Tools
 
         public override int ExecuteCommand(TestOptions options)
         {
+            CurseOfDimensionality();
+            return 0;
             var data = RetrieveData(options);
 
             List<MachineRow> result = new List<MachineRow>();
@@ -76,6 +79,53 @@ namespace CommandLineTools.Tools
             FileService.WriteAllText(options.OutputFilePath, sb.ToString());
 
             return 0;
+        }
+
+        struct CodData
+        {
+            public int RandomVars { get; set; }
+            public int Degree { get; set; }
+            public int Polynomials { get; set; }
+        }
+        /// <summary>
+        /// Choose n over k
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="k"></param>
+        /// <returns></returns>
+        private int Choose(int n, int k)
+        {
+            return (int) (SpecialFunctions.Factorial(n) / (SpecialFunctions.Factorial(k) * SpecialFunctions.Factorial(n - k)));
+        }
+        private void CurseOfDimensionality()
+        {
+            List<CodData> codData = new List<CodData>();
+            for (int p = 6; p <= 12; p += 2)
+            {
+                for (int m = 1; m <= 20; m += 1)
+                {
+                    Math.Exp(4);
+                    codData.Add(new CodData()
+                    {
+                        RandomVars = m,
+                        Degree = p,
+                        Polynomials = Choose(m + p, m),
+                    });
+                }
+            }
+            var tuples = codData.Select(x => $"({x.RandomVars},{x.Degree},{x.Polynomials})");
+            var values = string.Join(",", tuples);
+            using (var connection = SQLiteHelpers.CreateConnection("curse_of_dimensionality.sqlite"))
+            {
+                connection.Open();
+                var command = new SQLiteCommand(connection)
+                {
+                    CommandText = $"INSERT INTO cod VALUES {values}",
+                };
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
+            }
         }
 
         private void CreateText(StringBuilder sb, IList<MachineRow> values, IList<double> arraySizeAverages)

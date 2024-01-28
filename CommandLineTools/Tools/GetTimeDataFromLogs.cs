@@ -75,6 +75,17 @@ namespace CommandLineTools.Tools
                 options.InFiles = Directory.EnumerateFiles(".");
             }
 
+            if (!options.InFiles.Any())
+            {
+                Console.WriteLine("No files specified or available");
+                return 1;
+            }
+
+            if (options.OutFile == null)
+            {
+                options.OutFile = options.InFiles.First() + ".sqlite";
+            }
+
             List<Report> data = new List<Report>();
 
             foreach (var file in options.InFiles)
@@ -116,28 +127,45 @@ namespace CommandLineTools.Tools
             };
         }
 
-        private void WriteToDatabase(IEnumerable<Report> reports, string filename)
+        private static void WriteToDatabase(IEnumerable<Report> reports, string filename)
         {
             using (var conn = SQLiteHelpers.CreateConnection(filename))
             {
+                var dateTimeString = DateTime.Now.ToString("yyyy_MM_dd_hh_mm_ss");
+                var reportTable = $"reports{dateTimeString}";
+                var aggregateTable = $"aggregated{dateTimeString}";
                 conn.Open();
-                var command = new SQLiteCommand(conn);
-                command.CommandText =
-                    "CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY, class TEXT NULL, method TEXT NULL, timeInMs INTEGER NULL);";
-                command.ExecuteNonQuery();
-                command.CommandText = "DELETE FROM reports;";
-                command.ExecuteNonQuery();
-                command.Dispose();
+                using (var command = new SQLiteCommand(conn))
+                {
+                    command.CommandText =
+                        $"CREATE TABLE IF NOT EXISTS {reportTable} (id INTEGER PRIMARY KEY, class TEXT NULL, method TEXT NULL, timeInMs INTEGER NULL);";
+                    command.ExecuteNonQuery();
+                    command.CommandText = $"DELETE FROM {reportTable};";
+                    command.ExecuteNonQuery();
+                }
+
                 foreach (var report in reports)
                 {
-                    using (command = new SQLiteCommand(conn))
+                    using (var command = new SQLiteCommand(conn))
                     {
-                        command.CommandText = $"INSERT INTO reports (class, method, timeInMs) VALUES (@Param1, @Param2, @Param3);";
+                        command.CommandText = $"INSERT INTO {reportTable} (class, method, timeInMs) VALUES (@Param1, @Param2, @Param3);";
                         command.Parameters.AddWithValue("@Param1", report.ClassName);
                         command.Parameters.AddWithValue("@Param2", report.MethodName);
                         command.Parameters.AddWithValue("@Param3", report.Time.TotalMilliseconds);
                         command.ExecuteNonQuery();
                     }
+                }
+
+                using (var command = new SQLiteCommand(conn))
+                {
+                    command.CommandText =
+                        $"CREATE TABLE IF NOT EXISTS {aggregateTable} (id INTEGER PRIMARY KEY, class TEXT NULL, method TEXT NULL, measurements INTEGER NULL, minTimeInMs INTEGER NULL, maxTimeInMs INTEGER NULL, avgTimeInMs INTEGER NULL);";
+                    command.ExecuteNonQuery();
+                    command.CommandText = $"DELETE FROM {aggregateTable};";
+                    command.ExecuteNonQuery();
+                    command.CommandText =
+                        $"INSERT INTO {aggregateTable} (class, method, measurements, minTimeInMs, maxTimeInMs, avgTimeInMs) SELECT class, method, COUNT(timeInMs), MIN(timeInMs), MAX(timeInMs), AVG(timeInMs) FROM {reportTable} GROUP BY class, method;";
+                    command.ExecuteNonQuery();
                 }
 
                 conn.Close();

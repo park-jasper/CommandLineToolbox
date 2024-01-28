@@ -15,9 +15,9 @@ namespace CommandLineTools
             _fileService = fileService;
         }
 
-        public void Run(string[] args)
+        public ParserBuilder Build()
         {
-            Parser
+            return Parser
                 .Default
                 .Builder(_fileService)
                 .WithTool<InFileReplaceOptions, InFileReplace>()
@@ -33,7 +33,8 @@ namespace CommandLineTools
                 .WithTool<StrongNameOptions, StrongNameTool>()
                 .WithTool<GetTimeDataFromLogsOptions, GetTimeDataFromLogs>()
                 .WithTool<ChecksumOptions, ChecksumTool>()
-                .Parse(args);
+                .WithTool<LineCountOptions, LineCountTool>()
+                .WithTool<ReduceCsvOptions, ReduceCsvTool>();
         }
     }
 

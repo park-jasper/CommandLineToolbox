@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLineToolbox.Services;
+using CommandLineTools.Windows.Options;
+using CommandLineTools.Windows.Tools;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 
@@ -26,21 +28,36 @@ namespace CommandLineToolbox
 #if DEBUG
             if (Debugger.IsAttached)
             {
-                args = new[]
-                {
-                    "inFileReplace",
-                    "--in=inFileReplaceTest.txt",
-                    "--out=inFileReplaceTestOut.txt",
-                    "--parseAsNewline=NL",
-                    "--parseAsSpace=SPACE",
-                    "--find=NL",
-                    "--replaceWith=SPACE",
-                };
+                //    args = new[]
+                //    {
+                //        "inFileReplace",
+                //        "--in=inFileReplaceTest.txt",
+                //        "--out=inFileReplaceTestOut.txt",
+                //        "--parseAsNewline=NL",
+                //        "--parseAsSpace=SPACE",
+                //        "--find=NL",
+                //        "--replaceWith=SPACE",
+                //    };
+                //args = new[]
+                //{
+                //    "crypto",
+                //    "--decrypt",
+                //    "--in=E:\\Jasper\\temp\\encryption\\bahn_security_question.txt.encrypted",
+                //    "--keep",
+                //};
+                //args = new[]
+                //{
+                //    "timeFromLogs",
+                //    "--in=c:\\ProgramData\\Logs\\HappyAppy.Server\\HappyAppy.Server_21108_2021-04-28.log",
+                //    "--out=tempout.sqlite",
+                //};
             }
 #endif
             new CommandLineTools
                 .CommandLineTools(new FileService())
-                .Run(args);
+                .Build()
+                .WithTool<WhoLockMeOptions, WhoLockMe>()
+                .Parse(args);
             if (Debugger.IsAttached)
             {
                 Console.WriteLine("Exit delayed because of attached debugger. Press any key to exit");
