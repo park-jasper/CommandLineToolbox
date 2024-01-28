@@ -1,8 +1,9 @@
-﻿using CommandLine;
+﻿using System.Security.Cryptography;
+using CommandLine;
 
 namespace CommandLineTools.Options
 {
-    [Verb("checksum")]
+    [Verb("checksum", HelpText = "Calculate the Checksum for a file")]
     public class ChecksumOptions
     {
         public const string MD5 = "md5";
