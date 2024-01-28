@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Windows Machine": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false
+    },
+    "Profile 1": {
+      "commandName": "Executable",
+      "commandLineArgs": "\"e:\\Jasper\\Install\\MusicProgs\\Volumio\\Volumio 3.324\\Volumio-3.324-2022-07-11-pi.img.md5\""
+    }
+  }
+}

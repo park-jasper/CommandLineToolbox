@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ChecksumApp.MainPage">
+
+    <ScrollView>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0">Dateiname:</Label>
+            <Label Grid.Row="0" Grid.Column="1" Text="{Binding Path=FileName}" />
+            <Label Grid.Row="1" Grid.Column="0">Checksum (soll):</Label>
+            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Path=ChecksumShouldBe}" />
+            <Label Grid.Row="2" Grid.Column="0">Checksum (ist):</Label>
+            <Label Grid.Row="2" Grid.Column="1" Text="{Binding Path=ChecksumIs}" />
+            <Label Grid.Row="3" Grid.Column="1" Text="{Binding Path=Success}" />
+            <Button Grid.Row="3" Grid.Column="2" Text="Check" Command="{Binding Path=CheckCommand}"></Button>
+        </Grid>
+    </ScrollView>
+
+</ContentPage>
